@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.common.extension;
 
 import java.lang.annotation.Documented;
@@ -28,10 +29,10 @@ import java.lang.annotation.Target;
  * 以Protocol示例，配置文件META-INF/dubbo/com.xxx.Protocol内容：<br />
  * 由<br/>
  * <pre><code>com.foo.XxxProtocol
-com.foo.YyyProtocol</code></pre><br/>
+ * com.foo.YyyProtocol</code></pre><br/>
  * 改成使用KV格式<br/>
  * <pre><code>xxx=com.foo.XxxProtocol
-yyy=com.foo.YyyProtocol
+ * yyy=com.foo.YyyProtocol
  * </code></pre>
  * <br/>
  * 原因：<br/>
@@ -56,6 +57,6 @@ public @interface SPI {
     /**
      * 缺省扩展点名。
      */
-	String value() default "";
+    String value() default "";
 
 }
