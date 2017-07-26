@@ -125,6 +125,7 @@ public class ServiceBean<T> extends ServiceConfig<T>
         if (delay == null && provider != null) {
             delay = provider.getDelay();
         }
+        // delay = -1, 延迟到Spring初始化完成后再暴露服务：(基于Spring的ContextRefreshedEvent事件触发暴露)
         return supportedApplicationListener && (delay == null || delay.intValue() == -1);
     }
 
