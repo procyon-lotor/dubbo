@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.rpc.service;
 
 /**
  * Echo service.
- * 
+ * 回声测试，用于测试整个调用是否通畅
+ *
  * @author qian.lei
  * @export
  */
@@ -25,7 +27,7 @@ public interface EchoService {
 
     /**
      * echo test.
-     * 
+     *
      * @param message message.
      * @return message.
      */

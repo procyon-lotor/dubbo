@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.config.spring.extension;
-
-import java.util.Set;
-
-import org.springframework.context.ApplicationContext;
 
 import com.alibaba.dubbo.common.extension.ExtensionFactory;
 import com.alibaba.dubbo.common.utils.ConcurrentHashSet;
+import org.springframework.context.ApplicationContext;
+
+import java.util.Set;
 
 /**
  * SpringExtensionFactory
- * 
+ *
  * @author william.liangf
  */
 public class SpringExtensionFactory implements ExtensionFactory {
-    
+
     private static final Set<ApplicationContext> contexts = new ConcurrentHashSet<ApplicationContext>();
-    
+
     public static void addApplicationContext(ApplicationContext context) {
         contexts.add(context);
     }
@@ -39,6 +39,14 @@ public class SpringExtensionFactory implements ExtensionFactory {
         contexts.remove(context);
     }
 
+    /**
+     * 从所有的应用上下文对象中获取指定 name 的 bean，会依据传递的 type 作类型校验
+     *
+     * @param type object type.
+     * @param name object name.
+     * @param <T>
+     * @return
+     */
     @SuppressWarnings("unchecked")
     public <T> T getExtension(Class<T> type, String name) {
         for (ApplicationContext context : contexts) {

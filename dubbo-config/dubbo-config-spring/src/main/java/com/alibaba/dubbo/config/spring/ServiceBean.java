@@ -74,6 +74,7 @@ public class ServiceBean<T> extends ServiceConfig<T>
 
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+        // 记录 applicationContext 对象到 set 集合中
         SpringExtensionFactory.addApplicationContext(applicationContext);
         if (applicationContext != null) {
             SPRING_CONTEXT = applicationContext;
@@ -101,20 +102,26 @@ public class ServiceBean<T> extends ServiceConfig<T>
         this.beanName = name;
     }
 
+    // 实现了 org.springframework.context.ApplicationListener.onApplicationEvent 方法，订阅事件
     public void onApplicationEvent(ApplicationEvent event) {
         if (ContextRefreshedEvent.class.getName().equals(event.getClass().getName())) {
-            if (isDelay() && !isExported() && !isUnexported()) {
+            if (this.isDelay() && !this.isExported() && !this.isUnexported()) {
                 if (logger.isInfoEnabled()) {
                     logger.info("The service ready on spring started. service: " + getInterface());
                 }
-                export();
+                this.export();
             }
         }
     }
 
+    /**
+     * 是否延迟暴露
+     *
+     * @return
+     */
     private boolean isDelay() {
-        Integer delay = getDelay();
-        ProviderConfig provider = getProvider();
+        Integer delay = this.getDelay();
+        ProviderConfig provider = this.getProvider();
         if (delay == null && provider != null) {
             delay = provider.getDelay();
         }

@@ -124,10 +124,12 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 delay = provider.getDelay();
             }
         }
+        // 检查是否允许暴露
         if (export != null && !export.booleanValue()) {
             return;
         }
         if (delay != null && delay > 0) {
+            // 延迟暴露
             Thread thread = new Thread(new Runnable() {
                 public void run() {
                     try {
@@ -141,12 +143,13 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             thread.setName("DelayExportServiceThread");
             thread.start();
         } else {
-            doExport();
+            // 立即暴露
+            this.doExport();
         }
     }
 
     protected synchronized void doExport() {
-        if (unexported) {
+        if (unexported) { // 理解为服务卸载？
             throw new IllegalStateException("Already unexported!");
         }
         if (exported) {

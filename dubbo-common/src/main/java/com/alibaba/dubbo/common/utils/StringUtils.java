@@ -402,6 +402,13 @@ public final class StringUtils {
         return buf.toString();
     }
 
+    /**
+     * 将驼峰命名按照大写字母采用指定分隔符split分隔
+     *
+     * @param camelName
+     * @param split
+     * @return
+     */
     public static String camelToSplitName(String camelName, String split) {
         if (camelName == null || camelName.length() == 0) {
             return camelName;

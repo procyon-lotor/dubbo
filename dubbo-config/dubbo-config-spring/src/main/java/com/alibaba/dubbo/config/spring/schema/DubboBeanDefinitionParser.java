@@ -75,6 +75,7 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
 
     /**
      * 实现接口方法
+     * 解析对应的标签配置，封装成 BeanDefinition 对象
      *
      * @param element
      * @param parserContext
@@ -168,6 +169,7 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
                 // setUserName -> userName
                 String property = StringUtils.camelToSplitName(name.substring(3, 4).toLowerCase() + name.substring(4), "-");
                 props.add(property);
+                // 获取 getter 方法
                 Method getter = null;
                 try {
                     getter = beanClass.getMethod("get" + name.substring(3), new Class<?>[0]);
@@ -310,8 +312,7 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
     }
 
     @SuppressWarnings("unchecked")
-    private static void parseMultiRef(String property, String value, RootBeanDefinition beanDefinition,
-                                      ParserContext parserContext) {
+    private static void parseMultiRef(String property, String value, RootBeanDefinition beanDefinition, ParserContext parserContext) {
         String[] values = value.split("\\s*[,]+\\s*");
         ManagedList list = null;
         for (int i = 0; i < values.length; i++) {
@@ -402,8 +403,7 @@ public class DubboBeanDefinitionParser implements BeanDefinitionParser {
             for (int i = 0; i < nodeList.getLength(); i++) {
                 Node node = nodeList.item(i);
                 if (node instanceof Element) {
-                    if ("parameter".equals(node.getNodeName())
-                            || "parameter".equals(node.getLocalName())) {
+                    if ("parameter".equals(node.getNodeName()) || "parameter".equals(node.getLocalName())) {
                         if (parameters == null) {
                             parameters = new ManagedMap();
                         }
