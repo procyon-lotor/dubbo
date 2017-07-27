@@ -77,6 +77,7 @@ public abstract class AbstractConfig implements Serializable {
     private static final Map<String, String> legacyProperties = new HashMap<String, String>();
 
     static {
+        // 遗留配置
         legacyProperties.put("dubbo.protocol.name", "dubbo.service.protocol");
         legacyProperties.put("dubbo.protocol.host", "dubbo.service.server.host");
         legacyProperties.put("dubbo.protocol.port", "dubbo.service.server.port");
@@ -136,6 +137,11 @@ public abstract class AbstractConfig implements Serializable {
         }
     }
 
+    /**
+     * 附加属性到 config 对象中
+     *
+     * @param config
+     */
     protected static void appendProperties(AbstractConfig config) {
         if (config == null) {
             return;
@@ -145,8 +151,10 @@ public abstract class AbstractConfig implements Serializable {
         for (Method method : methods) {
             try {
                 String name = method.getName();
-                if (name.length() > 3 && name.startsWith("set") && Modifier.isPublic(method.getModifiers())
-                        && method.getParameterTypes().length == 1 && isPrimitive(method.getParameterTypes()[0])) {
+                // 处理所有的 setter 方法
+                if (name.length() > 3 && name.startsWith("set") && Modifier.isPublic(method.getModifiers()) // public setter
+                        && method.getParameterTypes().length == 1 // 参数个数为 1
+                        && isPrimitive(method.getParameterTypes()[0])) {
                     String property = StringUtils.camelToSplitName(name.substring(3, 4).toLowerCase() + name.substring(4), "-");
 
                     String value = null;
@@ -194,7 +202,7 @@ public abstract class AbstractConfig implements Serializable {
                         }
                     }
                     if (value != null && value.length() > 0) {
-                        method.invoke(config, new Object[] {convertPrimitive(method.getParameterTypes()[0], value)});
+                        method.invoke(config, convertPrimitive(method.getParameterTypes()[0], value));
                     }
                 }
             } catch (Exception e) {

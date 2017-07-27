@@ -125,7 +125,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             }
         }
         // 检查是否允许暴露
-        if (export != null && !export.booleanValue()) {
+        if (export != null && !export) {
             return;
         }
         if (delay != null && delay > 0) {
@@ -159,7 +159,8 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         if (interfaceName == null || interfaceName.length() == 0) {
             throw new IllegalStateException("<dubbo:service interface=\"\" /> interface not allow null!");
         }
-        checkDefault();
+        // 解析配置封装到对象中
+        this.checkDefault();
         if (provider != null) {
             if (application == null) {
                 application = provider.getApplication();
@@ -198,13 +199,13 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             generic = true;
         } else {
             try {
-                interfaceClass = Class.forName(interfaceName, true, Thread.currentThread()
-                        .getContextClassLoader());
+                // 获取自定义接口类的 Class 引用
+                interfaceClass = Class.forName(interfaceName, true, Thread.currentThread().getContextClassLoader());
             } catch (ClassNotFoundException e) {
                 throw new IllegalStateException(e.getMessage(), e);
             }
-            checkInterfaceAndMethods(interfaceClass, methods);
-            checkRef();
+            this.checkInterfaceAndMethods(interfaceClass, methods);
+            this.checkRef();
             generic = false;
         }
         if (local != null) {
@@ -235,26 +236,26 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 throw new IllegalStateException("The stub implemention class " + stubClass.getName() + " not implement interface " + interfaceName);
             }
         }
-        checkApplication();
-        checkRegistry();
-        checkProtocol();
+        this.checkApplication();
+        this.checkRegistry();
+        this.checkProtocol();
         appendProperties(this);
-        checkStubAndMock(interfaceClass);
+        this.checkStubAndMock(interfaceClass);
         if (path == null || path.length() == 0) {
             path = interfaceName;
         }
-        doExportUrls();
+        this.doExportUrls();
     }
 
+    /**
+     * 检查引用 ref 配置不为空，并且引用必需实现了服务接口
+     */
     private void checkRef() {
-        // 检查引用不为空，并且引用必需实现接口
         if (ref == null) {
             throw new IllegalStateException("ref not allow null!");
         }
         if (!interfaceClass.isInstance(ref)) {
-            throw new IllegalStateException("The class "
-                    + ref.getClass().getName() + " unimplemented interface "
-                    + interfaceClass + "!");
+            throw new IllegalStateException("The class " + ref.getClass().getName() + " unimplemented interface " + interfaceClass + "!");
         }
     }
 
@@ -280,9 +281,9 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrls() {
-        List<URL> registryURLs = loadRegistries(true);
+        List<URL> registryURLs = this.loadRegistries(true);
         for (ProtocolConfig protocolConfig : protocols) {
-            doExportUrlsFor1Protocol(protocolConfig, registryURLs);
+            this.doExportUrlsFor1Protocol(protocolConfig, registryURLs);
         }
     }
 
