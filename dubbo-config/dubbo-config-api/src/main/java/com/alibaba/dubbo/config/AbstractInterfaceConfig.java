@@ -143,6 +143,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         if (application == null) {
             throw new IllegalStateException("No such application config! Please add <dubbo:application name=\"...\" /> to your spring config.");
         }
+
         appendProperties(application);
 
         String wait = ConfigUtils.getProperty(Constants.SHUTDOWN_WAIT_KEY);

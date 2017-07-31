@@ -54,17 +54,41 @@ public class DubboNamespaceHandler extends NamespaceHandlerSupport {
         Version.checkDuplicate(DubboNamespaceHandler.class);
     }
 
+    // 注册对应的标签解析器
     public void init() {
-        // 注册对应的标签解析器
+        // <dubbo:application/> 配置应用信息
         this.registerBeanDefinitionParser("application", new DubboBeanDefinitionParser(ApplicationConfig.class, true));
+
+        // <dubbo:module/> 模块信息配置
         this.registerBeanDefinitionParser("module", new DubboBeanDefinitionParser(ModuleConfig.class, true));
+
+        // <dubbo:registry/> 注册中心配置
+        // 如果有多个不同的注册中心，可以声明多个<dubbo:registry>标签，并在<dubbo:service>或<dubbo:reference>的registry属性指定使用的注册中心
         this.registerBeanDefinitionParser("registry", new DubboBeanDefinitionParser(RegistryConfig.class, true));
+
+        // <dubbo:monitor/> 监控中心配置
         this.registerBeanDefinitionParser("monitor", new DubboBeanDefinitionParser(MonitorConfig.class, true));
+
+        // <dubbo:provider/> 服务提供者默认值配置
+        // 用于为 <dubbo:service/> 和 <dubbo:protocol/> 提供配置默认值
         this.registerBeanDefinitionParser("provider", new DubboBeanDefinitionParser(ProviderConfig.class, true));
+
+        // <dubbo:consumer/> 服务消费者默认值配置
+        // 用于为 <dubbo:reference/> 标签提供默认值
         this.registerBeanDefinitionParser("consumer", new DubboBeanDefinitionParser(ConsumerConfig.class, true));
+
+        // <dubbo:protocol/> 服务提供者协议配置
+        // 如果需要支持多协议，可以声明多个<dubbo:protocol>标签，并在<dubbo:service>中通过protocol属性指定使用的协议
         this.registerBeanDefinitionParser("protocol", new DubboBeanDefinitionParser(ProtocolConfig.class, true));
+
+        // <dubbo:service/> 暴露的服务接口, 定义服务的元信息
         this.registerBeanDefinitionParser("service", new DubboBeanDefinitionParser(ServiceBean.class, true));
+
+        // <dubbo:reference/> 服务消费者引用服务配置
+        // 用于创建一个远程服务代理，一个引用可以指向多个注册中心
         this.registerBeanDefinitionParser("reference", new DubboBeanDefinitionParser(ReferenceBean.class, false));
+
+
         this.registerBeanDefinitionParser("annotation", new DubboBeanDefinitionParser(AnnotationBean.class, true));
     }
 

@@ -149,7 +149,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
     }
 
     protected synchronized void doExport() {
-        if (unexported) { // 理解为服务卸载？
+        if (unexported) {
             throw new IllegalStateException("Already unexported!");
         }
         if (exported) {
@@ -204,10 +204,16 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             } catch (ClassNotFoundException e) {
                 throw new IllegalStateException(e.getMessage(), e);
             }
+            /*
+             * 检查接口和配置的方法
+             * 确保配置的接口是存在的，同时配置的方法确实是接口中声明的
+             */
             this.checkInterfaceAndMethods(interfaceClass, methods);
+            // 检查引用 ref 配置不为空，并且引用必需实现了服务接口
             this.checkRef();
             generic = false;
         }
+        // 本地代理
         if (local != null) {
             if (local == "true") {
                 local = interfaceName + "Local";
@@ -219,7 +225,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 throw new IllegalStateException(e.getMessage(), e);
             }
             if (!interfaceClass.isAssignableFrom(localClass)) {
-                throw new IllegalStateException("The local implemention class " + localClass.getName() + " not implement interface " + interfaceName);
+                throw new IllegalStateException("The local implementation class " + localClass.getName() + " not implement interface " + interfaceName);
             }
         }
         if (stub != null) {
@@ -233,7 +239,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 throw new IllegalStateException(e.getMessage(), e);
             }
             if (!interfaceClass.isAssignableFrom(stubClass)) {
-                throw new IllegalStateException("The stub implemention class " + stubClass.getName() + " not implement interface " + interfaceName);
+                throw new IllegalStateException("The stub implementation class " + stubClass.getName() + " not implement interface " + interfaceName);
             }
         }
         this.checkApplication();
@@ -455,10 +461,8 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         }
         URL url = new URL(name, host, port, (contextPath == null || contextPath.length() == 0 ? "" : contextPath + "/") + path, map);
 
-        if (ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class)
-                .hasExtension(url.getProtocol())) {
-            url = ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class)
-                    .getExtension(url.getProtocol()).getConfigurator(url).configure(url);
+        if (ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class).hasExtension(url.getProtocol())) {
+            url = ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class).getExtension(url.getProtocol()).getConfigurator(url).configure(url);
         }
 
         String scope = url.getParameter(Constants.SCOPE_KEY);
