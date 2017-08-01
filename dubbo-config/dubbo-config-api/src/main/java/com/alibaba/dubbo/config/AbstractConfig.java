@@ -155,9 +155,13 @@ public abstract class AbstractConfig implements Serializable {
                 if (name.length() > 3 && name.startsWith("set") && Modifier.isPublic(method.getModifiers()) // public setter
                         && method.getParameterTypes().length == 1 // 参数个数为 1
                         && isPrimitive(method.getParameterTypes()[0])) {
+
+                    // 解析方法名对应的属性名称，并将驼峰命名以大写字母分隔成为用中划线分隔，setUserAge -> user-age
                     String property = StringUtils.camelToSplitName(name.substring(3, 4).toLowerCase() + name.substring(4), "-");
 
                     String value = null;
+
+                    // 配置了 id 属性
                     if (config.getId() != null && config.getId().length() > 0) {
                         String pn = prefix + config.getId() + "." + property;
                         value = System.getProperty(pn);

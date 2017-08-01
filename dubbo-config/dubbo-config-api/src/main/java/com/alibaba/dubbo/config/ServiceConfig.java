@@ -247,6 +247,8 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         this.checkProtocol();
         appendProperties(this);
         this.checkStubAndMock(interfaceClass);
+
+        // path = org.zhenchao.rpc.dubbo.api.CalculateService
         if (path == null || path.length() == 0) {
             path = interfaceName;
         }
@@ -288,6 +290,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrls() {
         List<URL> registryURLs = this.loadRegistries(true);
+        // registry://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=dubbo-demo&dubbo=2.5.3&pid=8924&registry=zookeeper&timestamp=1501582776631
         for (ProtocolConfig protocolConfig : protocols) {
             this.doExportUrlsFor1Protocol(protocolConfig, registryURLs);
         }

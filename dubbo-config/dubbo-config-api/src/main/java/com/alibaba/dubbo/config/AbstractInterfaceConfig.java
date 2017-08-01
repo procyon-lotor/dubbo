@@ -103,6 +103,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     // 服务暴露或引用的scope,如果为local，则表示只在当前JVM内查找.
     private String scope;
 
+    // <dubbo:registry />
     protected void checkRegistry() {
         // 兼容旧版本
         if (registries == null || registries.size() == 0) {
@@ -146,7 +147,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
 
         appendProperties(application);
 
-        String wait = ConfigUtils.getProperty(Constants.SHUTDOWN_WAIT_KEY);
+        String wait = ConfigUtils.getProperty(Constants.SHUTDOWN_WAIT_KEY); // dubbo.service.shutdown.wait
         if (wait != null && wait.trim().length() > 0) {
             System.setProperty(Constants.SHUTDOWN_WAIT_KEY, wait.trim());
         } else {
@@ -158,7 +159,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     }
 
     protected List<URL> loadRegistries(boolean provider) {
-        checkRegistry();
+        this.checkRegistry();
         List<URL> registryList = new ArrayList<URL>();
         if (registries != null && registries.size() > 0) {
             for (RegistryConfig config : registries) {
@@ -179,6 +180,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                     map.put("dubbo", Version.getVersion());
                     map.put(Constants.TIMESTAMP_KEY, String.valueOf(System.currentTimeMillis()));
                     if (ConfigUtils.getPid() > 0) {
+                        // pid
                         map.put(Constants.PID_KEY, String.valueOf(ConfigUtils.getPid()));
                     }
                     if (!map.containsKey("protocol")) {
@@ -188,12 +190,18 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                             map.put("protocol", "dubbo");
                         }
                     }
+
+                    // <protocol>://<host>:<port>/<path>
+                    // zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=dubbo-demo&dubbo=2.5.3&pid=8924&timestamp=1501582776631
                     List<URL> urls = UrlUtils.parseURLs(address, map);
                     for (URL url : urls) {
+                        // 附加 registry 参数
                         url = url.addParameter(Constants.REGISTRY_KEY, url.getProtocol());
+                        // 设置 protocol=registry
                         url = url.setProtocol(Constants.REGISTRY_PROTOCOL);
                         if ((provider && url.getParameter(Constants.REGISTER_KEY, true))
                                 || (!provider && url.getParameter(Constants.SUBSCRIBE_KEY, true))) {
+                            // registry://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=dubbo-demo&dubbo=2.5.3&pid=8924&registry=zookeeper&timestamp=1501582776631
                             registryList.add(url);
                         }
                     }
