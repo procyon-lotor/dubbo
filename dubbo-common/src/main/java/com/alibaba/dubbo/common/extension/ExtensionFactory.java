@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.common.extension;
 
 /**
  * ExtensionFactory
- * 
+ *
  * @author william.liangf
  * @export
  */
@@ -26,7 +27,7 @@ public interface ExtensionFactory {
 
     /**
      * Get extension.
-     * 
+     *
      * @param type object type.
      * @param name object name.
      * @return object instance.

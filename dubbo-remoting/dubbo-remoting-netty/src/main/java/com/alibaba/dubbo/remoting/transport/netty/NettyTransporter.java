@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.remoting.transport.netty;
 
 import com.alibaba.dubbo.common.URL;
@@ -28,7 +29,7 @@ import com.alibaba.dubbo.remoting.Transporter;
 public class NettyTransporter implements Transporter {
 
     public static final String NAME = "netty";
-    
+
     public Server bind(URL url, ChannelHandler listener) throws RemotingException {
         return new NettyServer(url, listener);
     }

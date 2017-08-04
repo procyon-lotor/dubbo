@@ -290,7 +290,15 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void doExportUrls() {
         List<URL> registryURLs = this.loadRegistries(true);
-        // registry://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=dubbo-demo&dubbo=2.5.3&pid=8924&registry=zookeeper&timestamp=1501582776631
+        /*
+         * <dubbo:registry protocol="zookeeper" address="127.0.0.1:2181"/>
+         * <dubbo:registry protocol="dubbo" address="127.0.0.1:9090"/>
+         *
+         * 经过上述步骤会将配置的 registry 转换成如下表示，这里配置了两个
+         *
+         * registry://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=dubbo-demo&dubbo=2.5.3&pid=8924&registry=zookeeper&timestamp=1501582776631
+         * registry://127.0.0.1:9090/com.alibaba.dubbo.registry.RegistryService?application=dubbo-demo&dubbo=2.5.3&pid=2311&registry=dubbo&timestamp=1501833541113
+         */
         for (ProtocolConfig protocolConfig : protocols) {
             this.doExportUrlsFor1Protocol(protocolConfig, registryURLs);
         }
@@ -310,6 +318,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         if (NetUtils.isInvalidLocalHost(host)) {
             anyhost = true;
             try {
+                // 获取本机地址
                 host = InetAddress.getLocalHost().getHostAddress();
             } catch (UnknownHostException e) {
                 logger.warn(e.getMessage(), e);
@@ -320,6 +329,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         try {
                             Socket socket = new Socket();
                             try {
+                                // 尝试连接，并解析得到域名对应 ip
                                 SocketAddress addr = new InetSocketAddress(registryURL.getHost(), registryURL.getPort());
                                 socket.connect(addr, 1000);
                                 host = socket.getLocalAddress().getHostAddress();
@@ -341,14 +351,17 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             }
         }
 
-        Integer port = protocolConfig.getPort();
+        Integer port = protocolConfig.getPort(); // 20880
         if (provider != null && (port == null || port == 0)) {
             port = provider.getPort();
         }
+        // 获取当前协议默认端口
         final int defaultPort = ExtensionLoader.getExtensionLoader(Protocol.class).getExtension(name).getDefaultPort();
         if (port == null || port == 0) {
             port = defaultPort;
         }
+
+        // 生成随机端口
         if (port == null || port <= 0) {
             port = getRandomPort(name);
             if (port == null || port < 0) {
@@ -368,11 +381,15 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         if (ConfigUtils.getPid() > 0) {
             map.put(Constants.PID_KEY, String.valueOf(ConfigUtils.getPid()));
         }
-        appendParameters(map, application);
-        appendParameters(map, module);
-        appendParameters(map, provider, Constants.DEFAULT_KEY);
+
+        // 记录相应配置信息到 map
+        appendParameters(map, application);  // ApplicationConfig 应用信息
+        appendParameters(map, module); // ModuleConfig 模块信息
+        appendParameters(map, provider, Constants.DEFAULT_KEY); // ProviderConfig
         appendParameters(map, protocolConfig);
         appendParameters(map, this);
+
+        // 解析方法配置
         if (methods != null && methods.size() > 0) {
             for (MethodConfig method : methods) {
                 appendParameters(map, method, method.getName());
@@ -433,11 +450,13 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
             map.put("generic", String.valueOf(true));
             map.put("methods", Constants.ANY_VALUE);
         } else {
+            // 获取接口版本
             String revision = Version.getVersion(interfaceClass, version);
             if (revision != null && revision.length() > 0) {
                 map.put("revision", revision);
             }
 
+            // 获取接口的方法名称列表
             String[] methods = Wrapper.getWrapper(interfaceClass).getMethodNames();
             if (methods.length == 0) {
                 logger.warn("NO method found in service interface " + interfaceClass.getName());
@@ -462,22 +481,27 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         if ((contextPath == null || contextPath.length() == 0) && provider != null) {
             contextPath = provider.getContextpath();
         }
+
+        // dubbo://192.168.254.1:20880/org.zhenchao.rpc.dubbo.api.CalculateService?anyhost=true&application=dubbo-demo&dubbo=2.5.3&group=sum&interface=org.zhenchao.rpc.dubbo.api.CalculateService&methods=calculate&module=dubbo-demo-provider&pid=4351&revision=1.0.0&side=provider&timestamp=1501834784296&version=1.0.0
         URL url = new URL(name, host, port, (contextPath == null || contextPath.length() == 0 ? "" : contextPath + "/") + path, map);
 
         if (ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class).hasExtension(url.getProtocol())) {
             url = ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class).getExtension(url.getProtocol()).getConfigurator(url).configure(url);
         }
 
+        // 获取 scope
         String scope = url.getParameter(Constants.SCOPE_KEY);
-        //配置为none不暴露
-        if (!Constants.SCOPE_NONE.toString().equalsIgnoreCase(scope)) {
 
-            //配置不是remote的情况下做本地暴露 (配置为remote，则表示只暴露远程服务)
-            if (!Constants.SCOPE_REMOTE.toString().equalsIgnoreCase(scope)) {
-                exportLocal(url);
+        // 配置为 none 不暴露
+        if (!Constants.SCOPE_NONE.equalsIgnoreCase(scope)) {
+
+            // 配置不是 remote 的情况下做本地暴露 (配置为 remote，则表示只暴露远程服务)
+            if (!Constants.SCOPE_REMOTE.equalsIgnoreCase(scope)) {
+                this.exportLocal(url);
             }
-            //如果配置不是local则暴露为远程服务.(配置为local，则表示只暴露远程服务)
-            if (!Constants.SCOPE_LOCAL.toString().equalsIgnoreCase(scope)) {
+
+            // 如果配置不是 local 则暴露为远程服务.(配置为 local，则表示只暴露远程服务)
+            if (!Constants.SCOPE_LOCAL.equalsIgnoreCase(scope)) {
                 if (logger.isInfoEnabled()) {
                     logger.info("Export dubbo service " + interfaceClass.getName() + " to url " + url);
                 }
@@ -485,14 +509,15 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                         && url.getParameter("register", true)) {
                     for (URL registryURL : registryURLs) {
                         url = url.addParameterIfAbsent("dynamic", registryURL.getParameter("dynamic"));
-                        URL monitorUrl = loadMonitor(registryURL);
+                        URL monitorUrl = this.loadMonitor(registryURL);
                         if (monitorUrl != null) {
                             url = url.addParameterAndEncoded(Constants.MONITOR_KEY, monitorUrl.toFullString());
                         }
                         if (logger.isInfoEnabled()) {
                             logger.info("Register dubbo service " + interfaceClass.getName() + " url " + url + " to registry " + registryURL);
                         }
-                        Invoker<?> invoker = proxyFactory.getInvoker(ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
+                        Invoker<?> invoker = proxyFactory.getInvoker(
+                                ref, (Class) interfaceClass, registryURL.addParameterAndEncoded(Constants.EXPORT_KEY, url.toFullString()));
 
                         Exporter<?> exporter = protocol.export(invoker);
                         exporters.add(exporter);
@@ -510,13 +535,13 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void exportLocal(URL url) {
-        if (!Constants.LOCAL_PROTOCOL.equalsIgnoreCase(url.getProtocol())) {
+        if (!Constants.LOCAL_PROTOCOL.equalsIgnoreCase(url.getProtocol())) { // 不是 injvm
             URL local = URL.valueOf(url.toFullString())
-                    .setProtocol(Constants.LOCAL_PROTOCOL)
+                    .setProtocol(Constants.LOCAL_PROTOCOL) // injvm
                     .setHost(NetUtils.LOCALHOST)
                     .setPort(0);
-            Exporter<?> exporter = protocol.export(
-                    proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
+            // local = injvm://127.0.0.1/org.zhenchao.rpc.dubbo.api.CalculateService?anyhost=true&application=dubbo-demo&dubbo=2.5.3&group=sum&interface=org.zhenchao.rpc.dubbo.api.CalculateService&methods=calculate&module=dubbo-demo-provider&pid=4351&revision=1.0.0&side=provider&timestamp=1501834784296&version=1.0.0
+            Exporter<?> exporter = protocol.export(proxyFactory.getInvoker(ref, (Class) interfaceClass, local));
             exporters.add(exporter);
             logger.info("Export dubbo service " + interfaceClass.getName() + " to local registry");
         }
