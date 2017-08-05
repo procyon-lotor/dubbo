@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.remoting;
 
 import com.alibaba.dubbo.common.URL;
@@ -23,7 +24,7 @@ import com.alibaba.dubbo.remoting.transport.ChannelHandlerDispatcher;
 
 /**
  * Transporter facade. (API, Static, ThreadSafe)
- * 
+ *
  * @author william.liangf
  */
 public class Transporters {
@@ -77,7 +78,7 @@ public class Transporters {
         Version.checkDuplicate(RemotingException.class);
     }
 
-    private Transporters(){
+    private Transporters() {
     }
 
 }

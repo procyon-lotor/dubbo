@@ -93,6 +93,7 @@ public class ExtensionLoader<T> {
     private String cachedDefaultName;
 
     private final Holder<Object> cachedAdaptiveInstance = new Holder<Object>();
+
     private volatile Throwable createAdaptiveInstanceError;
 
     private Set<Class<?>> cachedWrapperClasses;
@@ -127,7 +128,7 @@ public class ExtensionLoader<T> {
 
     private ExtensionLoader(Class<?> type) {
         this.type = type;
-        objectFactory = (type == ExtensionFactory.class ? null :
+        this.objectFactory = (type == ExtensionFactory.class ? null :
                 ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());
     }
 
@@ -530,14 +531,14 @@ public class ExtensionLoader<T> {
                             && Modifier.isPublic(method.getModifiers())) {
                         Class<?> pt = method.getParameterTypes()[0];
                         try {
-                            String property = method.getName().length() > 3 ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4) : "";
+                            String property = method.getName().length() > 3
+                                    ? method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4) : "";
                             Object object = objectFactory.getExtension(pt, property);
                             if (object != null) {
                                 method.invoke(instance, object);
                             }
                         } catch (Exception e) {
-                            logger.error("fail to inject via method " + method.getName()
-                                    + " of interface " + type.getName() + ": " + e.getMessage(), e);
+                            logger.error("fail to inject via method " + method.getName() + " of interface " + type.getName() + ": " + e.getMessage(), e);
                         }
                     }
                 }
@@ -735,18 +736,18 @@ public class ExtensionLoader<T> {
         if (cachedAdaptiveClass != null) {
             return cachedAdaptiveClass;
         }
-        return cachedAdaptiveClass = createAdaptiveExtensionClass();
+        return cachedAdaptiveClass = this.createAdaptiveExtensionClass();
     }
 
     private Class<?> createAdaptiveExtensionClass() {
-        String code = createAdaptiveExtensionClassCode();
+        String code = this.createAdaptiveExtensionClassCode();
         ClassLoader classLoader = findClassLoader();
         com.alibaba.dubbo.common.compiler.Compiler compiler = ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.common.compiler.Compiler.class).getAdaptiveExtension();
         return compiler.compile(code, classLoader);
     }
 
     private String createAdaptiveExtensionClassCode() {
-        StringBuilder codeBuidler = new StringBuilder();
+        StringBuilder codeBuilder = new StringBuilder();
         Method[] methods = type.getMethods();
         boolean hasAdaptiveAnnotation = false;
         for (Method m : methods) {
@@ -760,9 +761,9 @@ public class ExtensionLoader<T> {
             throw new IllegalStateException("No adaptive method on extension " + type.getName() + ", refuse to create the adaptive class!");
         }
 
-        codeBuidler.append("package " + type.getPackage().getName() + ";");
-        codeBuidler.append("\nimport " + ExtensionLoader.class.getName() + ";");
-        codeBuidler.append("\npublic class " + type.getSimpleName() + "$Adpative" + " implements " + type.getCanonicalName() + " {");
+        codeBuilder.append("package " + type.getPackage().getName() + ";");
+        codeBuilder.append("\nimport " + ExtensionLoader.class.getName() + ";");
+        codeBuilder.append("\npublic class " + type.getSimpleName() + "$Adpative" + " implements " + type.getCanonicalName() + " {");
 
         for (Method method : methods) {
             Class<?> rt = method.getReturnType();
@@ -926,34 +927,34 @@ public class ExtensionLoader<T> {
                 code.append(");");
             }
 
-            codeBuidler.append("\npublic " + rt.getCanonicalName() + " " + method.getName() + "(");
+            codeBuilder.append("\npublic " + rt.getCanonicalName() + " " + method.getName() + "(");
             for (int i = 0; i < pts.length; i++) {
                 if (i > 0) {
-                    codeBuidler.append(", ");
+                    codeBuilder.append(", ");
                 }
-                codeBuidler.append(pts[i].getCanonicalName());
-                codeBuidler.append(" ");
-                codeBuidler.append("arg" + i);
+                codeBuilder.append(pts[i].getCanonicalName());
+                codeBuilder.append(" ");
+                codeBuilder.append("arg" + i);
             }
-            codeBuidler.append(")");
+            codeBuilder.append(")");
             if (ets.length > 0) {
-                codeBuidler.append(" throws ");
+                codeBuilder.append(" throws ");
                 for (int i = 0; i < ets.length; i++) {
                     if (i > 0) {
-                        codeBuidler.append(", ");
+                        codeBuilder.append(", ");
                     }
-                    codeBuidler.append(pts[i].getCanonicalName());
+                    codeBuilder.append(pts[i].getCanonicalName());
                 }
             }
-            codeBuidler.append(" {");
-            codeBuidler.append(code.toString());
-            codeBuidler.append("\n}");
+            codeBuilder.append(" {");
+            codeBuilder.append(code.toString());
+            codeBuilder.append("\n}");
         }
-        codeBuidler.append("\n}");
+        codeBuilder.append("\n}");
         if (logger.isDebugEnabled()) {
-            logger.debug(codeBuidler.toString());
+            logger.debug(codeBuilder.toString());
         }
-        return codeBuidler.toString();
+        return codeBuilder.toString();
     }
 
     private static ClassLoader findClassLoader() {

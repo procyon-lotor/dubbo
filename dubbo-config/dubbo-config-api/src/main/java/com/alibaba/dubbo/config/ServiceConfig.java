@@ -134,8 +134,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
                 public void run() {
                     try {
                         Thread.sleep(delay);
-                    } catch (Throwable e) {
-                    }
+                    } catch (Throwable e) {}
                     doExport();
                 }
             });
