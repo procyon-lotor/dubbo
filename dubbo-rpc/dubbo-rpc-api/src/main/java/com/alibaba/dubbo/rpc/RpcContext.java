@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.alibaba.dubbo.rpc;
 
 import com.alibaba.dubbo.common.Constants;
@@ -35,7 +34,7 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * Thread local context. (API, ThreadLocal, ThreadSafe)
- *
+ * <p>
  * 注意：RpcContext是一个临时状态记录器，当接收到RPC请求，或发起RPC请求时，RpcContext的状态都会变化。
  * 比如：A调B，B再调C，则B机器上，在B调C之前，RpcContext记录的是A调B的信息，在B调C之后，RpcContext记录的是B调C的信息。
  *
@@ -52,6 +51,32 @@ public class RpcContext {
             return new RpcContext();
         }
     };
+    private final Map<String, String> attachments = new HashMap<String, String>();
+    private final Map<String, Object> values = new HashMap<String, Object>();
+    private Future<?> future;
+
+    private List<URL> urls;
+
+    private URL url;
+
+    private String methodName;
+
+    private Class<?>[] parameterTypes;
+
+    private Object[] arguments;
+
+    private InetSocketAddress localAddress;
+
+    private InetSocketAddress remoteAddress;
+    @Deprecated
+    private List<Invoker<?>> invokers;
+    @Deprecated
+    private Invoker<?> invoker;
+    @Deprecated
+    private Invocation invocation;
+
+    protected RpcContext() {
+    }
 
     /**
      * get context.
@@ -69,38 +94,6 @@ public class RpcContext {
      */
     public static void removeContext() {
         LOCAL.remove();
-    }
-
-    private Future<?> future;
-
-    private List<URL> urls;
-
-    private URL url;
-
-    private String methodName;
-
-    private Class<?>[] parameterTypes;
-
-    private Object[] arguments;
-
-    private InetSocketAddress localAddress;
-
-    private InetSocketAddress remoteAddress;
-
-    private final Map<String, String> attachments = new HashMap<String, String>();
-
-    private final Map<String, Object> values = new HashMap<String, Object>();
-
-    @Deprecated
-    private List<Invoker<?>> invokers;
-
-    @Deprecated
-    private Invoker<?> invoker;
-
-    @Deprecated
-    private Invocation invocation;
-
-    protected RpcContext() {
     }
 
     /**
@@ -229,17 +222,6 @@ public class RpcContext {
     /**
      * set local address.
      *
-     * @param address
-     * @return context
-     */
-    public RpcContext setLocalAddress(InetSocketAddress address) {
-        this.localAddress = address;
-        return this;
-    }
-
-    /**
-     * set local address.
-     *
      * @param host
      * @param port
      * @return context
@@ -261,6 +243,17 @@ public class RpcContext {
         return localAddress;
     }
 
+    /**
+     * set local address.
+     *
+     * @param address
+     * @return context
+     */
+    public RpcContext setLocalAddress(InetSocketAddress address) {
+        this.localAddress = address;
+        return this;
+    }
+
     public String getLocalAddressString() {
         return getLocalHost() + ":" + getLocalPort();
     }
@@ -276,17 +269,6 @@ public class RpcContext {
             return getLocalHost();
         }
         return host;
-    }
-
-    /**
-     * set remote address.
-     *
-     * @param address
-     * @return context
-     */
-    public RpcContext setRemoteAddress(InetSocketAddress address) {
-        this.remoteAddress = address;
-        return this;
     }
 
     /**
@@ -311,6 +293,17 @@ public class RpcContext {
      */
     public InetSocketAddress getRemoteAddress() {
         return remoteAddress;
+    }
+
+    /**
+     * set remote address.
+     *
+     * @param address
+     * @return context
+     */
+    public RpcContext setRemoteAddress(InetSocketAddress address) {
+        this.remoteAddress = address;
+        return this;
     }
 
     /**
@@ -485,36 +478,6 @@ public class RpcContext {
         return values.get(key);
     }
 
-    public RpcContext setInvokers(List<Invoker<?>> invokers) {
-        this.invokers = invokers;
-        if (invokers != null && invokers.size() > 0) {
-            List<URL> urls = new ArrayList<URL>(invokers.size());
-            for (Invoker<?> invoker : invokers) {
-                urls.add(invoker.getUrl());
-            }
-            setUrls(urls);
-        }
-        return this;
-    }
-
-    public RpcContext setInvoker(Invoker<?> invoker) {
-        this.invoker = invoker;
-        if (invoker != null) {
-            setUrl(invoker.getUrl());
-        }
-        return this;
-    }
-
-    public RpcContext setInvocation(Invocation invocation) {
-        this.invocation = invocation;
-        if (invocation != null) {
-            setMethodName(invocation.getMethodName());
-            setParameterTypes(invocation.getParameterTypes());
-            setArguments(invocation.getArguments());
-        }
-        return this;
-    }
-
     /**
      * @deprecated Replace to isProviderSide()
      */
@@ -540,6 +503,18 @@ public class RpcContext {
         return invokers == null && invoker != null ? (List) Arrays.asList(invoker) : invokers;
     }
 
+    public RpcContext setInvokers(List<Invoker<?>> invokers) {
+        this.invokers = invokers;
+        if (invokers != null && invokers.size() > 0) {
+            List<URL> urls = new ArrayList<URL>(invokers.size());
+            for (Invoker<?> invoker : invokers) {
+                urls.add(invoker.getUrl());
+            }
+            setUrls(urls);
+        }
+        return this;
+    }
+
     /**
      * @deprecated Replace to getUrl()
      */
@@ -548,12 +523,30 @@ public class RpcContext {
         return invoker;
     }
 
+    public RpcContext setInvoker(Invoker<?> invoker) {
+        this.invoker = invoker;
+        if (invoker != null) {
+            setUrl(invoker.getUrl());
+        }
+        return this;
+    }
+
     /**
      * @deprecated Replace to getMethodName(), getParameterTypes(), getArguments()
      */
     @Deprecated
     public Invocation getInvocation() {
         return invocation;
+    }
+
+    public RpcContext setInvocation(Invocation invocation) {
+        this.invocation = invocation;
+        if (invocation != null) {
+            setMethodName(invocation.getMethodName());
+            setParameterTypes(invocation.getParameterTypes());
+            setArguments(invocation.getArguments());
+        }
+        return this;
     }
 
     /**
@@ -605,7 +598,7 @@ public class RpcContext {
 
                 public T get(long timeout, TimeUnit unit)
                         throws InterruptedException, ExecutionException,
-                               TimeoutException {
+                        TimeoutException {
                     return get();
                 }
             };

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.alibaba.dubbo.common.utils;
 
 import java.lang.reflect.Array;
@@ -25,6 +24,46 @@ import java.util.Map;
 import java.util.Set;
 
 public class ClassHelper {
+
+    /**
+     * Suffix for array class names: "[]"
+     */
+    public static final String ARRAY_SUFFIX = "[]";
+    /**
+     * Prefix for internal array class names: "[L"
+     */
+    private static final String INTERNAL_ARRAY_PREFIX = "[L";
+    /**
+     * Map with primitive type name as key and corresponding primitive type as
+     * value, for example: "int" -> "int.class".
+     */
+    private static final Map<String, Class<?>> primitiveTypeNameMap = new HashMap<String, Class<?>>(16);
+    /**
+     * Map with primitive wrapper type as key and corresponding primitive type
+     * as value, for example: Integer.class -> int.class.
+     */
+    private static final Map<Class<?>, Class<?>> primitiveWrapperTypeMap = new HashMap<Class<?>, Class<?>>(8);
+
+    static {
+        primitiveWrapperTypeMap.put(Boolean.class, boolean.class);
+        primitiveWrapperTypeMap.put(Byte.class, byte.class);
+        primitiveWrapperTypeMap.put(Character.class, char.class);
+        primitiveWrapperTypeMap.put(Double.class, double.class);
+        primitiveWrapperTypeMap.put(Float.class, float.class);
+        primitiveWrapperTypeMap.put(Integer.class, int.class);
+        primitiveWrapperTypeMap.put(Long.class, long.class);
+        primitiveWrapperTypeMap.put(Short.class, short.class);
+
+        Set<Class<?>> primitiveTypeNames = new HashSet<Class<?>>(16);
+        primitiveTypeNames.addAll(primitiveWrapperTypeMap.values());
+        primitiveTypeNames.addAll(Arrays
+                .asList(new Class<?>[]{boolean[].class, byte[].class, char[].class, double[].class,
+                        float[].class, int[].class, long[].class, short[].class}));
+        for (Iterator<Class<?>> it = primitiveTypeNames.iterator(); it.hasNext(); ) {
+            Class<?> primitiveClass = (Class<?>) it.next();
+            primitiveTypeNameMap.put(primitiveClass.getName(), primitiveClass);
+        }
+    }
 
     public static Class<?> forNameWithThreadContextClassLoader(String name)
             throws ClassNotFoundException {
@@ -91,9 +130,9 @@ public class ClassHelper {
      * instances for primitives (like "int") and array class names (like
      * "String[]").
      *
-     * @param name the name of the Class
+     * @param name        the name of the Class
      * @param classLoader the class loader to use (may be <code>null</code>,
-     * which indicates the default class loader)
+     *                    which indicates the default class loader)
      * @return Class instance for the supplied name
      * @throws ClassNotFoundException if the class was not found
      * @throws LinkageError           if the class file could not be loaded
@@ -156,44 +195,6 @@ public class ClassHelper {
             result = (Class<?>) primitiveTypeNameMap.get(name);
         }
         return result;
-    }
-
-    /** Suffix for array class names: "[]" */
-    public static final String ARRAY_SUFFIX = "[]";
-    /** Prefix for internal array class names: "[L" */
-    private static final String INTERNAL_ARRAY_PREFIX = "[L";
-
-    /**
-     * Map with primitive type name as key and corresponding primitive type as
-     * value, for example: "int" -> "int.class".
-     */
-    private static final Map<String, Class<?>> primitiveTypeNameMap = new HashMap<String, Class<?>>(16);
-
-    /**
-     * Map with primitive wrapper type as key and corresponding primitive type
-     * as value, for example: Integer.class -> int.class.
-     */
-    private static final Map<Class<?>, Class<?>> primitiveWrapperTypeMap = new HashMap<Class<?>, Class<?>>(8);
-
-    static {
-        primitiveWrapperTypeMap.put(Boolean.class, boolean.class);
-        primitiveWrapperTypeMap.put(Byte.class, byte.class);
-        primitiveWrapperTypeMap.put(Character.class, char.class);
-        primitiveWrapperTypeMap.put(Double.class, double.class);
-        primitiveWrapperTypeMap.put(Float.class, float.class);
-        primitiveWrapperTypeMap.put(Integer.class, int.class);
-        primitiveWrapperTypeMap.put(Long.class, long.class);
-        primitiveWrapperTypeMap.put(Short.class, short.class);
-
-        Set<Class<?>> primitiveTypeNames = new HashSet<Class<?>>(16);
-        primitiveTypeNames.addAll(primitiveWrapperTypeMap.values());
-        primitiveTypeNames.addAll(Arrays
-                .asList(new Class<?>[] {boolean[].class, byte[].class, char[].class, double[].class,
-                        float[].class, int[].class, long[].class, short[].class}));
-        for (Iterator<Class<?>> it = primitiveTypeNames.iterator(); it.hasNext(); ) {
-            Class<?> primitiveClass = (Class<?>) it.next();
-            primitiveTypeNameMap.put(primitiveClass.getName(), primitiveClass);
-        }
     }
 
     public static String toShortString(Object obj) {

@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.alibaba.dubbo.common.utils;
 
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.io.UnsafeStringWriter;
-import com.alibaba.dubbo.common.json.JSON;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,18 +39,18 @@ import java.util.regex.Pattern;
 
 public final class StringUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(StringUtils.class);
-
     public static final String[] EMPTY_STRING_ARRAY = new String[0];
-
+    private static final Logger logger = LoggerFactory.getLogger(StringUtils.class);
     private static final Pattern KVP_PATTERN = Pattern.compile("([_.a-zA-Z0-9][-_.a-zA-Z0-9]*)[=](.*)"); //key value pair pattern.
 
     private static final Pattern INT_PATTERN = Pattern.compile("^\\d+$");
 
+    private StringUtils() {
+    }
+
     public static boolean isBlank(String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.length() == 0)
             return true;
-        }
         return false;
     }
 
@@ -63,9 +61,8 @@ public final class StringUtils {
      * @return is empty.
      */
     public static boolean isEmpty(String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.length() == 0)
             return true;
-        }
         return false;
     }
 
@@ -85,12 +82,10 @@ public final class StringUtils {
      * @return equals
      */
     public static boolean isEquals(String s1, String s2) {
-        if (s1 == null && s2 == null) {
+        if (s1 == null && s2 == null)
             return true;
-        }
-        if (s1 == null || s2 == null) {
+        if (s1 == null || s2 == null)
             return false;
-        }
         return s1.equals(s2);
     }
 
@@ -101,16 +96,14 @@ public final class StringUtils {
      * @return is integer
      */
     public static boolean isInteger(String str) {
-        if (str == null || str.length() == 0) {
+        if (str == null || str.length() == 0)
             return false;
-        }
         return INT_PATTERN.matcher(str).matches();
     }
 
     public static int parseInteger(String str) {
-        if (!isInteger(str)) {
+        if (!isInteger(str))
             return 0;
-        }
         return Integer.parseInt(str);
     }
 
@@ -206,9 +199,9 @@ public final class StringUtils {
     /**
      * translat.
      *
-     * @param src source string.
+     * @param src  source string.
      * @param from src char table.
-     * @param to target char table.
+     * @param to   target char table.
      * @return String.
      */
     public static String translat(String src, String from, String to) {
@@ -220,17 +213,15 @@ public final class StringUtils {
             c = src.charAt(i);
             ix = from.indexOf(c);
             if (ix == -1) {
-                if (sb != null) {
+                if (sb != null)
                     sb.append(c);
-                }
             } else {
                 if (sb == null) {
                     sb = new StringBuilder(len);
                     sb.append(src, 0, i);
                 }
-                if (ix < to.length()) {
+                if (ix < to.length())
                     sb.append(to.charAt(ix));
-                }
             }
         }
         return sb == null ? src : sb.toString();
@@ -249,16 +240,14 @@ public final class StringUtils {
         for (int i = 0; i < len; i++) {
             c = str.charAt(i);
             if (c == ch) {
-                if (list == null) {
+                if (list == null)
                     list = new ArrayList<String>();
-                }
                 list.add(str.substring(ix, i));
                 ix = i + 1;
             }
         }
-        if (ix > 0) {
+        if (ix > 0)
             list.add(str.substring(ix));
-        }
         return list == null ? EMPTY_STRING_ARRAY : (String[]) list.toArray(EMPTY_STRING_ARRAY);
     }
 
@@ -287,9 +276,8 @@ public final class StringUtils {
         if (array.length == 0) return "";
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < array.length; i++) {
-            if (i > 0) {
+            if (i > 0)
                 sb.append(split);
-            }
             sb.append(array[i]);
         }
         return sb.toString();
@@ -306,9 +294,8 @@ public final class StringUtils {
         if (array.length == 0) return "";
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < array.length; i++) {
-            if (i > 0) {
+            if (i > 0)
                 sb.append(split);
-            }
             sb.append(array[i]);
         }
         return sb.toString();
@@ -320,11 +307,8 @@ public final class StringUtils {
         StringBuilder sb = new StringBuilder();
         boolean isFirst = true;
         for (String s : coll) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                sb.append(split);
-            }
+            if (isFirst) isFirst = false;
+            else sb.append(split);
             sb.append(s);
         }
         return sb.toString();
@@ -333,7 +317,7 @@ public final class StringUtils {
     /**
      * parse key-value pair.
      *
-     * @param str string.
+     * @param str           string.
      * @param itemSeparator item separator.
      * @return key-value map;
      */
@@ -342,9 +326,8 @@ public final class StringUtils {
         Map<String, String> map = new HashMap<String, String>(tmp.length);
         for (int i = 0; i < tmp.length; i++) {
             Matcher matcher = KVP_PATTERN.matcher(tmp[i]);
-            if (matcher.matches() == false) {
+            if (matcher.matches() == false)
                 continue;
-            }
             map.put(matcher.group(1), matcher.group(2));
         }
         return map;
@@ -362,9 +345,8 @@ public final class StringUtils {
      * @return Parameters instance.
      */
     public static Map<String, String> parseQueryString(String qs) {
-        if (qs == null || qs.length() == 0) {
+        if (qs == null || qs.length() == 0)
             return new HashMap<String, String>();
-        }
         return parseKeyValuePair(qs, "\\&");
     }
 
@@ -402,13 +384,6 @@ public final class StringUtils {
         return buf.toString();
     }
 
-    /**
-     * 将驼峰命名按照大写字母采用指定分隔符split分隔
-     *
-     * @param camelName
-     * @param split
-     * @return
-     */
     public static String camelToSplitName(String camelName, String split) {
         if (camelName == null || camelName.length() == 0) {
             return camelName;
@@ -444,16 +419,13 @@ public final class StringUtils {
                 buf.append(arg);
             } else {
                 try {
-                    buf.append(JSON.json(arg));
-                } catch (IOException e) {
+                    buf.append(JSON.toJSONString(arg));
+                } catch (Exception e) {
                     logger.warn(e.getMessage(), e);
                     buf.append(arg);
                 }
             }
         }
         return buf.toString();
-    }
-
-    private StringUtils() {
     }
 }

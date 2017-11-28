@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.alibaba.dubbo.config;
 
 import com.alibaba.dubbo.common.Constants;
@@ -62,14 +61,14 @@ public abstract class AbstractServiceConfig extends AbstractInterfaceConfig {
 
     // 访问日志
     protected String accesslog;
-
+    protected List<ProtocolConfig> protocols;
     // 允许执行请求数
     private Integer executes;
-
-    protected List<ProtocolConfig> protocols;
-
     // 是否注册
     private Boolean register;
+
+    // 预热时间
+    private Integer warmup;
 
     public String getVersion() {
         return version;
@@ -169,7 +168,7 @@ public abstract class AbstractServiceConfig extends AbstractInterfaceConfig {
     }
 
     public void setProtocol(ProtocolConfig protocol) {
-        this.protocols = Arrays.asList(new ProtocolConfig[] {protocol});
+        this.protocols = Arrays.asList(new ProtocolConfig[]{protocol});
     }
 
     public String getAccesslog() {
@@ -221,5 +220,13 @@ public abstract class AbstractServiceConfig extends AbstractInterfaceConfig {
         if (Boolean.FALSE.equals(register)) {
             setRegistry(new RegistryConfig(RegistryConfig.NO_AVAILABLE));
         }
+    }
+
+    public Integer getWarmup() {
+        return warmup;
+    }
+
+    public void setWarmup(Integer warmup) {
+        this.warmup = warmup;
     }
 }

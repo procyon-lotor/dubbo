@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 
 /**
  * 扩展点接口的标识。
- * <p />
+ * <p/>
  * 扩展点声明配置文件，格式修改。<br />
  * 以Protocol示例，配置文件META-INF/dubbo/com.xxx.Protocol内容：<br />
  * 由<br/>

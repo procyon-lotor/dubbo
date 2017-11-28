@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.alibaba.dubbo.common.utils;
 
 import com.alibaba.dubbo.common.Constants;
@@ -27,7 +26,6 @@ import java.util.Set;
 
 public class UrlUtils {
 
-    // zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=dubbo-demo&dubbo=2.5.3&pid=8924&timestamp=1501582776631
     public static URL parseURL(String address, Map<String, String> defaults) {
         if (address == null || address.length() == 0) {
             return null;
@@ -357,7 +355,8 @@ public class UrlUtils {
     public static boolean isMatch(URL consumerUrl, URL providerUrl) {
         String consumerInterface = consumerUrl.getServiceInterface();
         String providerInterface = providerUrl.getServiceInterface();
-        if (!(Constants.ANY_VALUE.equals(consumerInterface) || StringUtils.isEquals(consumerInterface, providerInterface))) return false;
+        if (!(Constants.ANY_VALUE.equals(consumerInterface) || StringUtils.isEquals(consumerInterface, providerInterface)))
+            return false;
 
         if (!isMatchCategory(providerUrl.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY),
                 consumerUrl.getParameter(Constants.CATEGORY_KEY, Constants.DEFAULT_CATEGORY))) {
@@ -388,17 +387,14 @@ public class UrlUtils {
     }
 
     public static boolean isMatchGlobPattern(String pattern, String value) {
-        if ("*".equals(pattern)) {
+        if ("*".equals(pattern))
             return true;
-        }
         if ((pattern == null || pattern.length() == 0)
-                && (value == null || value.length() == 0)) {
+                && (value == null || value.length() == 0))
             return true;
-        }
         if ((pattern == null || pattern.length() == 0)
-                || (value == null || value.length() == 0)) {
+                || (value == null || value.length() == 0))
             return false;
-        }
 
         int i = pattern.lastIndexOf('*');
         // 没有找到星号
@@ -434,7 +430,7 @@ public class UrlUtils {
      * 判断 value 是否匹配 pattern，pattern 支持 * 通配符.
      *
      * @param pattern pattern
-     * @param value value
+     * @param value   value
      * @return true if match otherwise false
      */
     static boolean isItemMatch(String pattern, String value) {

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.alibaba.dubbo.config;
 
 import com.alibaba.dubbo.common.Constants;
@@ -43,11 +42,9 @@ import java.util.regex.Pattern;
  */
 public abstract class AbstractConfig implements Serializable {
 
-    private static final long serialVersionUID = 4267533505537413570L;
-
     protected static final Logger logger = LoggerFactory.getLogger(AbstractConfig.class);
-
-    private static final int MAX_LENGTH = 100;
+    private static final long serialVersionUID = 4267533505537413570L;
+    private static final int MAX_LENGTH = 200;
 
     private static final int MAX_PATH_LENGTH = 200;
 
@@ -62,22 +59,10 @@ public abstract class AbstractConfig implements Serializable {
     private static final Pattern PATTERN_NAME_HAS_SYMBOL = Pattern.compile("[:*,/\\-._0-9a-zA-Z]+");
 
     private static final Pattern PATTERN_KEY = Pattern.compile("[*,\\-._0-9a-zA-Z]+");
-
-    protected String id;
-
-    @Parameter(excluded = true)
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
     private static final Map<String, String> legacyProperties = new HashMap<String, String>();
+    private static final String[] SUFFIXS = new String[]{"Config", "Bean"};
 
     static {
-        // 遗留配置
         legacyProperties.put("dubbo.protocol.name", "dubbo.service.protocol");
         legacyProperties.put("dubbo.protocol.host", "dubbo.service.server.host");
         legacyProperties.put("dubbo.protocol.port", "dubbo.service.server.port");
@@ -87,6 +72,19 @@ public abstract class AbstractConfig implements Serializable {
         legacyProperties.put("dubbo.consumer.check", "dubbo.service.allow.no.provider");
         legacyProperties.put("dubbo.service.url", "dubbo.service.address");
     }
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            public void run() {
+                if (logger.isInfoEnabled()) {
+                    logger.info("Run shutdown hook now.");
+                }
+                ProtocolConfig.destroyAll();
+            }
+        }, "DubboShutdownHook"));
+    }
+
+    protected String id;
 
     private static String convertLegacyValue(String key, String value) {
         if (value != null && value.length() > 0) {
@@ -99,49 +97,6 @@ public abstract class AbstractConfig implements Serializable {
         return value;
     }
 
-    protected void appendAnnotation(Class<?> annotationClass, Object annotation) {
-        Method[] methods = annotationClass.getMethods();
-        for (Method method : methods) {
-            if (method.getDeclaringClass() != Object.class
-                    && method.getReturnType() != void.class
-                    && method.getParameterTypes().length == 0
-                    && Modifier.isPublic(method.getModifiers())
-                    && !Modifier.isStatic(method.getModifiers())) {
-                try {
-                    String property = method.getName();
-                    if ("interfaceClass".equals(property) || "interfaceName".equals(property)) {
-                        property = "interface";
-                    }
-                    String setter = "set" + property.substring(0, 1).toUpperCase() + property.substring(1);
-                    Object value = method.invoke(annotation, new Object[0]);
-                    if (value != null && !value.equals(method.getDefaultValue())) {
-                        Class<?> parameterType = ReflectUtils.getBoxedClass(method.getReturnType());
-                        if ("filter".equals(property) || "listener".equals(property)) {
-                            parameterType = String.class;
-                            value = StringUtils.join((String[]) value, ",");
-                        } else if ("parameters".equals(property)) {
-                            parameterType = Map.class;
-                            value = CollectionUtils.toStringMap((String[]) value);
-                        }
-                        try {
-                            Method setterMethod = getClass().getMethod(setter, new Class<?>[] {parameterType});
-                            setterMethod.invoke(this, new Object[] {value});
-                        } catch (NoSuchMethodException e) {
-                            // ignore
-                        }
-                    }
-                } catch (Throwable e) {
-                    logger.error(e.getMessage(), e);
-                }
-            }
-        }
-    }
-
-    /**
-     * 附加属性到 config 对象中
-     *
-     * @param config
-     */
     protected static void appendProperties(AbstractConfig config) {
         if (config == null) {
             return;
@@ -151,17 +106,11 @@ public abstract class AbstractConfig implements Serializable {
         for (Method method : methods) {
             try {
                 String name = method.getName();
-                // 处理所有的 setter 方法
-                if (name.length() > 3 && name.startsWith("set") && Modifier.isPublic(method.getModifiers()) // public setter
-                        && method.getParameterTypes().length == 1 // 参数个数为 1
-                        && isPrimitive(method.getParameterTypes()[0])) {
-
-                    // 解析方法名对应的属性名称，并将驼峰命名以大写字母分隔成为用中划线分隔，setUserAge -> user-age
-                    String property = StringUtils.camelToSplitName(name.substring(3, 4).toLowerCase() + name.substring(4), "-");
+                if (name.length() > 3 && name.startsWith("set") && Modifier.isPublic(method.getModifiers())
+                        && method.getParameterTypes().length == 1 && isPrimitive(method.getParameterTypes()[0])) {
+                    String property = StringUtils.camelToSplitName(name.substring(3, 4).toLowerCase() + name.substring(4), ".");
 
                     String value = null;
-
-                    // 配置了 id 属性
                     if (config.getId() != null && config.getId().length() > 0) {
                         String pn = prefix + config.getId() + "." + property;
                         value = System.getProperty(pn);
@@ -206,7 +155,7 @@ public abstract class AbstractConfig implements Serializable {
                         }
                     }
                     if (value != null && value.length() > 0) {
-                        method.invoke(config, convertPrimitive(method.getParameterTypes()[0], value));
+                        method.invoke(config, new Object[]{convertPrimitive(method.getParameterTypes()[0], value)});
                     }
                 }
             } catch (Exception e) {
@@ -316,9 +265,8 @@ public abstract class AbstractConfig implements Serializable {
                         && method.getParameterTypes().length == 0
                         && isPrimitive(method.getReturnType())) {
                     Parameter parameter = method.getAnnotation(Parameter.class);
-                    if (parameter == null || !parameter.attribute()) {
+                    if (parameter == null || !parameter.attribute())
                         continue;
-                    }
                     String key;
                     if (parameter != null && parameter.key() != null && parameter.key().length() > 0) {
                         key = parameter.key();
@@ -458,18 +406,52 @@ public abstract class AbstractConfig implements Serializable {
         }
     }
 
-    static {
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            public void run() {
-                if (logger.isInfoEnabled()) {
-                    logger.info("Run shutdown hook now.");
-                }
-                ProtocolConfig.destroyAll();
-            }
-        }, "DubboShutdownHook"));
+    @Parameter(excluded = true)
+    public String getId() {
+        return id;
     }
 
-    private static final String[] SUFFIXS = new String[] {"Config", "Bean"};
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    protected void appendAnnotation(Class<?> annotationClass, Object annotation) {
+        Method[] methods = annotationClass.getMethods();
+        for (Method method : methods) {
+            if (method.getDeclaringClass() != Object.class
+                    && method.getReturnType() != void.class
+                    && method.getParameterTypes().length == 0
+                    && Modifier.isPublic(method.getModifiers())
+                    && !Modifier.isStatic(method.getModifiers())) {
+                try {
+                    String property = method.getName();
+                    if ("interfaceClass".equals(property) || "interfaceName".equals(property)) {
+                        property = "interface";
+                    }
+                    String setter = "set" + property.substring(0, 1).toUpperCase() + property.substring(1);
+                    Object value = method.invoke(annotation, new Object[0]);
+                    if (value != null && !value.equals(method.getDefaultValue())) {
+                        Class<?> parameterType = ReflectUtils.getBoxedClass(method.getReturnType());
+                        if ("filter".equals(property) || "listener".equals(property)) {
+                            parameterType = String.class;
+                            value = StringUtils.join((String[]) value, ",");
+                        } else if ("parameters".equals(property)) {
+                            parameterType = Map.class;
+                            value = CollectionUtils.toStringMap((String[]) value);
+                        }
+                        try {
+                            Method setterMethod = getClass().getMethod(setter, new Class<?>[]{parameterType});
+                            setterMethod.invoke(this, new Object[]{value});
+                        } catch (NoSuchMethodException e) {
+                            // ignore
+                        }
+                    }
+                } catch (Throwable e) {
+                    logger.error(e.getMessage(), e);
+                }
+            }
+        }
+    }
 
     @Override
     public String toString() {

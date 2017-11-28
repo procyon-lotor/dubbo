@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.alibaba.dubbo.config;
 
 import com.alibaba.dubbo.common.Constants;
@@ -30,10 +29,8 @@ import java.util.Map;
  */
 public class RegistryConfig extends AbstractConfig {
 
-    private static final long serialVersionUID = 5508512956753757169L;
-
     public static final String NO_AVAILABLE = "N/A";
-
+    private static final long serialVersionUID = 5508512956753757169L;
     // 注册中心地址
     private String address;
 
@@ -99,6 +96,15 @@ public class RegistryConfig extends AbstractConfig {
         setAddress(address);
     }
 
+    public static void destroyAll() {
+        AbstractRegistryFactory.destroyAll();
+    }
+
+    @Deprecated
+    public static void closeAll() {
+        destroyAll();
+    }
+
     public String getProtocol() {
         return protocol;
     }
@@ -161,9 +167,8 @@ public class RegistryConfig extends AbstractConfig {
     @Deprecated
     public void setWait(Integer wait) {
         this.wait = wait;
-        if (wait != null && wait > 0) {
+        if (wait != null && wait > 0)
             System.setProperty(Constants.SHUTDOWN_WAIT_KEY, String.valueOf(wait));
-        }
     }
 
     public Boolean isCheck() {
@@ -319,15 +324,6 @@ public class RegistryConfig extends AbstractConfig {
 
     public void setDefault(Boolean isDefault) {
         this.isDefault = isDefault;
-    }
-
-    public static void destroyAll() {
-        AbstractRegistryFactory.destroyAll();
-    }
-
-    @Deprecated
-    public static void closeAll() {
-        destroyAll();
     }
 
 }

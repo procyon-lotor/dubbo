@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.alibaba.dubbo.config;
 
 import com.alibaba.dubbo.common.Constants;
@@ -119,6 +118,14 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
         return mock;
     }
 
+    public void setMock(Boolean mock) {
+        if (mock == null) {
+            setMock((String) null);
+        } else {
+            setMock(String.valueOf(mock));
+        }
+    }
+
     public void setMock(String mock) {
         if (mock != null && mock.startsWith(Constants.RETURN_PREFIX)) {
             checkLength("mock", mock);
@@ -126,14 +133,6 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
             checkName("mock", mock);
         }
         this.mock = mock;
-    }
-
-    public void setMock(Boolean mock) {
-        if (mock == null) {
-            setMock((String) null);
-        } else {
-            setMock(String.valueOf(mock));
-        }
     }
 
     public String getMerger() {

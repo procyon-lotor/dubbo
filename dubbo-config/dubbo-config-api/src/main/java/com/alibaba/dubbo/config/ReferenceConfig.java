@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.alibaba.dubbo.config;
 
 import com.alibaba.dubbo.common.Constants;
@@ -51,6 +50,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static com.alibaba.dubbo.common.utils.NetUtils.isInvalidLocalHost;
+
 /**
  * ReferenceConfig
  *
@@ -66,37 +67,24 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
     private static final Cluster cluster = ExtensionLoader.getExtensionLoader(Cluster.class).getAdaptiveExtension();
 
     private static final ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getAdaptiveExtension();
-
+    private final List<URL> urls = new ArrayList<URL>();
     // 接口类型
     private String interfaceName;
-
     private Class<?> interfaceClass;
-
     // 客户端类型
     private String client;
-
     // 点对点直连服务提供地址
     private String url;
-
     // 方法配置
     private List<MethodConfig> methods;
-
     // 缺省配置
     private ConsumerConfig consumer;
-
     private String protocol;
-
     // 接口代理类引用
     private transient volatile T ref;
-
     private transient volatile Invoker<?> invoker;
-
     private transient volatile boolean initialized;
-
     private transient volatile boolean destroyed;
-
-    private final List<URL> urls = new ArrayList<URL>();
-
     @SuppressWarnings("unused")
     private final Object finalizerGuardian = new Object() {
         @Override
@@ -122,6 +110,39 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
 
     public ReferenceConfig(Reference reference) {
         appendAnnotation(Reference.class, reference);
+    }
+
+    private static void checkAndConvertImplicitConfig(MethodConfig method, Map<String, String> map, Map<Object, Object> attributes) {
+        //check config conflict
+        if (Boolean.FALSE.equals(method.isReturn()) && (method.getOnreturn() != null || method.getOnthrow() != null)) {
+            throw new IllegalStateException("method config error : return attribute must be set true when onreturn or onthrow has been setted.");
+        }
+        //convert onreturn methodName to Method
+        String onReturnMethodKey = StaticContext.getKey(map, method.getName(), Constants.ON_RETURN_METHOD_KEY);
+        Object onReturnMethod = attributes.get(onReturnMethodKey);
+        if (onReturnMethod != null && onReturnMethod instanceof String) {
+            attributes.put(onReturnMethodKey, getMethodByName(method.getOnreturn().getClass(), onReturnMethod.toString()));
+        }
+        //convert onthrow methodName to Method
+        String onThrowMethodKey = StaticContext.getKey(map, method.getName(), Constants.ON_THROW_METHOD_KEY);
+        Object onThrowMethod = attributes.get(onThrowMethodKey);
+        if (onThrowMethod != null && onThrowMethod instanceof String) {
+            attributes.put(onThrowMethodKey, getMethodByName(method.getOnthrow().getClass(), onThrowMethod.toString()));
+        }
+        //convert oninvoke methodName to Method
+        String onInvokeMethodKey = StaticContext.getKey(map, method.getName(), Constants.ON_INVOKE_METHOD_KEY);
+        Object onInvokeMethod = attributes.get(onInvokeMethodKey);
+        if (onInvokeMethod != null && onInvokeMethod instanceof String) {
+            attributes.put(onInvokeMethodKey, getMethodByName(method.getOninvoke().getClass(), onInvokeMethod.toString()));
+        }
+    }
+
+    private static Method getMethodByName(Class<?> clazz, String methodName) {
+        try {
+            return ReflectUtils.findMethodByMethodName(clazz, methodName);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public URL toUrl() {
@@ -296,42 +317,19 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
                 checkAndConvertImplicitConfig(method, map, attributes);
             }
         }
+
+        //
+        String hostToRegistry = ConfigUtils.getSystemProperty(Constants.DUBBO_IP_TO_REGISTRY);
+        if (hostToRegistry == null || hostToRegistry.length() == 0) {
+            hostToRegistry = NetUtils.getLocalHost();
+        } else if (isInvalidLocalHost(hostToRegistry)) {
+            throw new IllegalArgumentException("Specified invalid registry ip from property:" + Constants.DUBBO_IP_TO_REGISTRY + ", value:" + hostToRegistry);
+        }
+        map.put(Constants.REGISTER_IP_KEY, hostToRegistry);
+
         //attributes通过系统context进行存储.
         StaticContext.getSystemContext().putAll(attributes);
         ref = createProxy(map);
-    }
-
-    private static void checkAndConvertImplicitConfig(MethodConfig method, Map<String, String> map, Map<Object, Object> attributes) {
-        //check config conflict
-        if (Boolean.FALSE.equals(method.isReturn()) && (method.getOnreturn() != null || method.getOnthrow() != null)) {
-            throw new IllegalStateException("method config error : return attribute must be set true when onreturn or onthrow has been setted.");
-        }
-        //convert onreturn methodName to Method
-        String onReturnMethodKey = StaticContext.getKey(map, method.getName(), Constants.ON_RETURN_METHOD_KEY);
-        Object onReturnMethod = attributes.get(onReturnMethodKey);
-        if (onReturnMethod != null && onReturnMethod instanceof String) {
-            attributes.put(onReturnMethodKey, getMethodByName(method.getOnreturn().getClass(), onReturnMethod.toString()));
-        }
-        //convert onthrow methodName to Method
-        String onThrowMethodKey = StaticContext.getKey(map, method.getName(), Constants.ON_THROW_METHOD_KEY);
-        Object onThrowMethod = attributes.get(onThrowMethodKey);
-        if (onThrowMethod != null && onThrowMethod instanceof String) {
-            attributes.put(onThrowMethodKey, getMethodByName(method.getOnthrow().getClass(), onThrowMethod.toString()));
-        }
-        //convert oninvoke methodName to Method
-        String onInvokeMethodKey = StaticContext.getKey(map, method.getName(), Constants.ON_INVOKE_METHOD_KEY);
-        Object onInvokeMethod = attributes.get(onInvokeMethodKey);
-        if (onInvokeMethod != null && onInvokeMethod instanceof String) {
-            attributes.put(onInvokeMethodKey, getMethodByName(method.getOninvoke().getClass(), onInvokeMethod.toString()));
-        }
-    }
-
-    private static Method getMethodByName(Class<?> clazz, String methodName) {
-        try {
-            return ReflectUtils.findMethodByMethodName(clazz, methodName);
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
@@ -467,19 +465,19 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
         return interfaceName;
     }
 
-    public void setInterface(String interfaceName) {
-        this.interfaceName = interfaceName;
-        if (id == null || id.length() == 0) {
-            id = interfaceName;
-        }
-    }
-
     public void setInterface(Class<?> interfaceClass) {
         if (interfaceClass != null && !interfaceClass.isInterface()) {
             throw new IllegalStateException("The interface class " + interfaceClass + " is not a interface!");
         }
         this.interfaceClass = interfaceClass;
         setInterface(interfaceClass == null ? (String) null : interfaceClass.getName());
+    }
+
+    public void setInterface(String interfaceName) {
+        this.interfaceName = interfaceName;
+        if (id == null || id.length() == 0) {
+            id = interfaceName;
+        }
     }
 
     public String getClient() {

@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.alibaba.dubbo.config;
 
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.config.support.Parameter;
 import com.alibaba.dubbo.rpc.InvokerListener;
 import com.alibaba.dubbo.rpc.support.ProtocolUtils;
+
 
 /**
  * AbstractConsumerConfig
@@ -37,7 +37,7 @@ public abstract class AbstractReferenceConfig extends AbstractInterfaceConfig {
     // 检查服务提供者是否存在
     protected Boolean check;
 
-    // 是否加载时即刻初始化，否则会在引用被注入到其它 bean 或被 getBean() 获取时才会初始化
+    // 是否加载时即刻初始化
     protected Boolean init;
 
     // 是否使用泛接口
@@ -89,12 +89,12 @@ public abstract class AbstractReferenceConfig extends AbstractInterfaceConfig {
         }
     }
 
-    public void setGeneric(String generic) {
-        this.generic = generic;
-    }
-
     public String getGeneric() {
         return generic;
+    }
+
+    public void setGeneric(String generic) {
+        this.generic = generic;
     }
 
     /**

@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.alibaba.dubbo.common;
 
 import com.alibaba.dubbo.common.logger.Logger;
@@ -33,20 +32,17 @@ import java.util.Set;
  */
 public final class Version {
 
-    private Version() {
-    }
-
     private static final Logger logger = LoggerFactory.getLogger(Version.class);
-
     private static final String VERSION = getVersion(Version.class, "2.0.0");
-
     private static final boolean INTERNAL = hasResource("com/alibaba/dubbo/registry/internal/RemoteRegistry.class");
-
     private static final boolean COMPATIBLE = hasResource("com/taobao/remoting/impl/ConnectionRequest.class");
 
     static {
         // 检查是否存在重复的jar包
         Version.checkDuplicate(Version.class);
+    }
+
+    private Version() {
     }
 
     public static String getVersion() {
@@ -114,12 +110,12 @@ public final class Version {
         }
     }
 
-    public static void checkDuplicate(Class<?> cls) {
-        checkDuplicate(cls, false);
-    }
-
     public static void checkDuplicate(Class<?> cls, boolean failOnError) {
         checkDuplicate(cls.getName().replace('.', '/') + ".class", failOnError);
+    }
+
+    public static void checkDuplicate(Class<?> cls) {
+        checkDuplicate(cls, false);
     }
 
     public static void checkDuplicate(String path, boolean failOnError) {

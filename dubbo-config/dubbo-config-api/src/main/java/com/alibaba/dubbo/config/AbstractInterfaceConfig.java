@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.alibaba.dubbo.config;
 
 import com.alibaba.dubbo.common.Constants;
@@ -36,7 +35,6 @@ import com.alibaba.dubbo.rpc.ProxyFactory;
 import com.alibaba.dubbo.rpc.cluster.Cluster;
 import com.alibaba.dubbo.rpc.support.MockInvoker;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -90,20 +88,15 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
 
     // 注册中心
     protected List<RegistryConfig> registries;
-
-    // callback实例个数限制
-    private Integer callbacks;
-
     // 连接事件
     protected String onconnect;
-
     // 断开事件
     protected String ondisconnect;
-
+    // callback实例个数限制
+    private Integer callbacks;
     // 服务暴露或引用的scope,如果为local，则表示只在当前JVM内查找.
     private String scope;
 
-    // <dubbo:registry />
     protected void checkRegistry() {
         // 兼容旧版本
         if (registries == null || registries.size() == 0) {
@@ -142,12 +135,12 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
             }
         }
         if (application == null) {
-            throw new IllegalStateException("No such application config! Please add <dubbo:application name=\"...\" /> to your spring config.");
+            throw new IllegalStateException(
+                    "No such application config! Please add <dubbo:application name=\"...\" /> to your spring config.");
         }
-
         appendProperties(application);
 
-        String wait = ConfigUtils.getProperty(Constants.SHUTDOWN_WAIT_KEY); // dubbo.service.shutdown.wait
+        String wait = ConfigUtils.getProperty(Constants.SHUTDOWN_WAIT_KEY);
         if (wait != null && wait.trim().length() > 0) {
             System.setProperty(Constants.SHUTDOWN_WAIT_KEY, wait.trim());
         } else {
@@ -159,7 +152,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
     }
 
     protected List<URL> loadRegistries(boolean provider) {
-        this.checkRegistry();
+        checkRegistry();
         List<URL> registryList = new ArrayList<URL>();
         if (registries != null && registries.size() > 0) {
             for (RegistryConfig config : registries) {
@@ -180,7 +173,6 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                     map.put("dubbo", Version.getVersion());
                     map.put(Constants.TIMESTAMP_KEY, String.valueOf(System.currentTimeMillis()));
                     if (ConfigUtils.getPid() > 0) {
-                        // pid
                         map.put(Constants.PID_KEY, String.valueOf(ConfigUtils.getPid()));
                     }
                     if (!map.containsKey("protocol")) {
@@ -190,18 +182,12 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                             map.put("protocol", "dubbo");
                         }
                     }
-
-                    // <protocol>://<host>:<port>/<path>
-                    // zookeeper://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=dubbo-demo&dubbo=2.5.3&pid=8924&timestamp=1501582776631
                     List<URL> urls = UrlUtils.parseURLs(address, map);
                     for (URL url : urls) {
-                        // 附加 registry 参数
                         url = url.addParameter(Constants.REGISTRY_KEY, url.getProtocol());
-                        // 设置 protocol=registry
                         url = url.setProtocol(Constants.REGISTRY_PROTOCOL);
                         if ((provider && url.getParameter(Constants.REGISTER_KEY, true))
                                 || (!provider && url.getParameter(Constants.SUBSCRIBE_KEY, true))) {
-                            // registry://127.0.0.1:2181/com.alibaba.dubbo.registry.RegistryService?application=dubbo-demo&dubbo=2.5.3&pid=8924&registry=zookeeper&timestamp=1501582776631
                             registryList.add(url);
                         }
                     }
@@ -215,11 +201,16 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         if (monitor == null) {
             String monitorAddress = ConfigUtils.getProperty("dubbo.monitor.address");
             String monitorProtocol = ConfigUtils.getProperty("dubbo.monitor.protocol");
-            if (monitorAddress != null && monitorAddress.length() > 0
-                    || monitorProtocol != null && monitorProtocol.length() > 0) {
-                monitor = new MonitorConfig();
-            } else {
+            if ((monitorAddress == null || monitorAddress.length() == 0) && (monitorProtocol == null || monitorProtocol.length() == 0)) {
                 return null;
+            }
+
+            monitor = new MonitorConfig();
+            if (monitorAddress != null && monitorAddress.length() > 0) {
+                monitor.setAddress(monitorAddress);
+            }
+            if (monitorProtocol != null && monitorProtocol.length() > 0) {
+                monitor.setProtocol(monitorProtocol);
             }
         }
         appendProperties(monitor);
@@ -251,13 +242,6 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         return null;
     }
 
-    /**
-     * 检查接口和配置的方法
-     * 确保配置的接口是存在的，同时配置的方法确实是接口中声明的
-     *
-     * @param interfaceClass
-     * @param methods
-     */
     protected void checkInterfaceAndMethods(Class<?> interfaceClass, List<MethodConfig> methods) {
         // 接口不能为空
         if (interfaceClass == null) {
@@ -275,14 +259,15 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                     throw new IllegalStateException("<dubbo:method> name attribute is required! Please check: <dubbo:service interface=\"" + interfaceClass.getName() + "\" ... ><dubbo:method name=\"\" ... /></<dubbo:reference>");
                 }
                 boolean hasMethod = false;
-                for (Method method : interfaceClass.getMethods()) {
+                for (java.lang.reflect.Method method : interfaceClass.getMethods()) {
                     if (method.getName().equals(methodName)) {
                         hasMethod = true;
                         break;
                     }
                 }
                 if (!hasMethod) {
-                    throw new IllegalStateException("The interface " + interfaceClass.getName() + " not found method " + methodName);
+                    throw new IllegalStateException("The interface " + interfaceClass.getName()
+                            + " not found method " + methodName);
                 }
             }
         }
@@ -292,23 +277,23 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         if (ConfigUtils.isNotEmpty(local)) {
             Class<?> localClass = ConfigUtils.isDefault(local) ? ReflectUtils.forName(interfaceClass.getName() + "Local") : ReflectUtils.forName(local);
             if (!interfaceClass.isAssignableFrom(localClass)) {
-                throw new IllegalStateException("The local implemention class " + localClass.getName() + " not implement interface " + interfaceClass.getName());
+                throw new IllegalStateException("The local implementation class " + localClass.getName() + " not implement interface " + interfaceClass.getName());
             }
             try {
                 ReflectUtils.findConstructor(localClass, interfaceClass);
             } catch (NoSuchMethodException e) {
-                throw new IllegalStateException("No such constructor \"public " + localClass.getSimpleName() + "(" + interfaceClass.getName() + ")\" in local implemention class " + localClass.getName());
+                throw new IllegalStateException("No such constructor \"public " + localClass.getSimpleName() + "(" + interfaceClass.getName() + ")\" in local implementation class " + localClass.getName());
             }
         }
         if (ConfigUtils.isNotEmpty(stub)) {
             Class<?> localClass = ConfigUtils.isDefault(stub) ? ReflectUtils.forName(interfaceClass.getName() + "Stub") : ReflectUtils.forName(stub);
             if (!interfaceClass.isAssignableFrom(localClass)) {
-                throw new IllegalStateException("The local implemention class " + localClass.getName() + " not implement interface " + interfaceClass.getName());
+                throw new IllegalStateException("The local implementation class " + localClass.getName() + " not implement interface " + interfaceClass.getName());
             }
             try {
                 ReflectUtils.findConstructor(localClass, interfaceClass);
             } catch (NoSuchMethodException e) {
-                throw new IllegalStateException("No such constructor \"public " + localClass.getSimpleName() + "(" + interfaceClass.getName() + ")\" in local implemention class " + localClass.getName());
+                throw new IllegalStateException("No such constructor \"public " + localClass.getSimpleName() + "(" + interfaceClass.getName() + ")\" in local implementation class " + localClass.getName());
             }
         }
         if (ConfigUtils.isNotEmpty(mock)) {
@@ -322,12 +307,12 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
             } else {
                 Class<?> mockClass = ConfigUtils.isDefault(mock) ? ReflectUtils.forName(interfaceClass.getName() + "Mock") : ReflectUtils.forName(mock);
                 if (!interfaceClass.isAssignableFrom(mockClass)) {
-                    throw new IllegalStateException("The mock implemention class " + mockClass.getName() + " not implement interface " + interfaceClass.getName());
+                    throw new IllegalStateException("The mock implementation class " + mockClass.getName() + " not implement interface " + interfaceClass.getName());
                 }
                 try {
                     mockClass.getConstructor(new Class<?>[0]);
                 } catch (NoSuchMethodException e) {
-                    throw new IllegalStateException("No such empty constructor \"public " + mockClass.getSimpleName() + "()\" in mock implemention class " + mockClass.getName());
+                    throw new IllegalStateException("No such empty constructor \"public " + mockClass.getSimpleName() + "()\" in mock implementation class " + mockClass.getName());
                 }
             }
         }
@@ -344,16 +329,6 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
 
     /**
      * @param local
-     * @deprecated Replace to <code>setStub(String)</code>
-     */
-    @Deprecated
-    public void setLocal(String local) {
-        checkName("local", local);
-        this.local = local;
-    }
-
-    /**
-     * @param local
      * @deprecated Replace to <code>setStub(Boolean)</code>
      */
     @Deprecated
@@ -365,13 +340,18 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         }
     }
 
-    public String getStub() {
-        return stub;
+    /**
+     * @param local
+     * @deprecated Replace to <code>setStub(String)</code>
+     */
+    @Deprecated
+    public void setLocal(String local) {
+        checkName("local", local);
+        this.local = local;
     }
 
-    public void setStub(String stub) {
-        checkName("stub", stub);
-        this.stub = stub;
+    public String getStub() {
+        return stub;
     }
 
     public void setStub(Boolean stub) {
@@ -380,6 +360,11 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         } else {
             setStub(String.valueOf(stub));
         }
+    }
+
+    public void setStub(String stub) {
+        checkName("stub", stub);
+        this.stub = stub;
     }
 
     public String getCluster() {
@@ -476,12 +461,12 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         return monitor;
     }
 
-    public void setMonitor(MonitorConfig monitor) {
-        this.monitor = monitor;
-    }
-
     public void setMonitor(String monitor) {
         this.monitor = new MonitorConfig(monitor);
+    }
+
+    public void setMonitor(MonitorConfig monitor) {
+        this.monitor = monitor;
     }
 
     public String getOwner() {
@@ -493,12 +478,12 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
         this.owner = owner;
     }
 
-    public void setCallbacks(Integer callbacks) {
-        this.callbacks = callbacks;
-    }
-
     public Integer getCallbacks() {
         return callbacks;
+    }
+
+    public void setCallbacks(Integer callbacks) {
+        this.callbacks = callbacks;
     }
 
     public String getOnconnect() {
