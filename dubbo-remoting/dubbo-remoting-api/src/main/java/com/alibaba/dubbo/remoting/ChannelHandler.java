@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.remoting;
 
 import com.alibaba.dubbo.common.extension.SPI;
-
 
 /**
  * ChannelHandler. (API, Prototype, ThreadSafe)
@@ -62,7 +62,7 @@ public interface ChannelHandler {
     /**
      * on exception caught.
      *
-     * @param channel   channel.
+     * @param channel channel.
      * @param exception exception.
      */
     void caught(Channel channel, Throwable exception) throws RemotingException;

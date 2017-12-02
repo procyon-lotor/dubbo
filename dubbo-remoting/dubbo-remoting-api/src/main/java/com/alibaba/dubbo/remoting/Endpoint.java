@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.remoting;
 
 import com.alibaba.dubbo.common.URL;
@@ -62,7 +63,7 @@ public interface Endpoint {
      * send message.
      *
      * @param message
-     * @param sent    是否已发送完成
+     * @param sent 是否已发送完成
      */
     void send(Object message, boolean sent) throws RemotingException;
 
