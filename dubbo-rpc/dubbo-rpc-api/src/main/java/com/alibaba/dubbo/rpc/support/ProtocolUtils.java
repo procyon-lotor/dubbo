@@ -11,11 +11,30 @@ public class ProtocolUtils {
     private ProtocolUtils() {
     }
 
+    /**
+     * 基于 url 构造服务标识
+     * /path:80?version={version}&group={group} -> group/path:version:port
+     *
+     * @param url
+     * @return
+     */
     public static String serviceKey(URL url) {
-        return serviceKey(url.getPort(), url.getPath(), url.getParameter(Constants.VERSION_KEY),
-                url.getParameter(Constants.GROUP_KEY));
+        return serviceKey(
+                url.getPort(), // 端口
+                url.getPath(), // 路径
+                url.getParameter(Constants.VERSION_KEY), // version
+                url.getParameter(Constants.GROUP_KEY)); // group
     }
 
+    /**
+     * 构建服务标识："serviceGroup/serviceName:serviceVersion:port"
+     *
+     * @param port
+     * @param serviceName
+     * @param serviceVersion
+     * @param serviceGroup
+     * @return
+     */
     public static String serviceKey(int port, String serviceName, String serviceVersion, String serviceGroup) {
         StringBuilder buf = new StringBuilder();
         if (serviceGroup != null && serviceGroup.length() > 0) {

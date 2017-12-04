@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.alibaba.dubbo.rpc.Protocol</OriginalElement>
+  <nodes>
+    <node x="603.1798941798942" y="93.0">com.alibaba.dubbo.rpc.protocol.AbstractProtocol</node>
+    <node x="224.17989417989418" y="186.0">com.alibaba.dubbo.rpc.protocol.redis.RedisProtocol</node>
+    <node x="164.42989417989418" y="93.0">com.alibaba.dubbo.rpc.protocol.ProtocolFilterWrapper</node>
+    <node x="0.0" y="186.0">com.alibaba.dubbo.rpc.protocol.injvm.InjvmProtocol</node>
+    <node x="338.6798941798942" y="269.0">com.alibaba.dubbo.rpc.protocol.rmi.RmiProtocol</node>
+    <node x="383.4298941798942" y="93.0">com.alibaba.dubbo.config.support.MockProtocol</node>
+    <node x="608.1798941798942" y="186.0">com.alibaba.dubbo.rpc.protocol.dubbo.DubboProtocol</node>
+    <node x="134.67989417989418" y="269.0">com.alibaba.dubbo.rpc.protocol.webservice.WebServiceProtocol</node>
+    <node x="1150.1798941798943" y="186.0">com.alibaba.dubbo.rpc.protocol.thrift.ThriftProtocol</node>
+    <node x="490.6798941798942" y="269.0">com.alibaba.dubbo.rpc.protocol.hessian.HessianProtocol</node>
+    <node x="387.1798941798942" y="186.0">com.alibaba.dubbo.rpc.protocol.AbstractProxyProtocol</node>
+    <node x="1024.1798941798943" y="93.0">com.alibaba.dubbo.registry.integration.RegistryProtocol</node>
+    <node x="988.1798941798942" y="186.0">com.alibaba.dubbo.rpc.support.MockProtocol</node>
+    <node x="670.6798941798942" y="269.0">com.alibaba.dubbo.rpc.protocol.http.HttpProtocol</node>
+    <node x="785.1798941798942" y="93.0">com.alibaba.dubbo.rpc.protocol.ProtocolListenerWrapper</node>
+    <node x="487.4298941798942" y="0.0">com.alibaba.dubbo.rpc.Protocol</node>
+    <node x="780.1798941798942" y="186.0">com.alibaba.dubbo.rpc.protocol.memcached.MemcachedProtocol</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.alibaba.dubbo.rpc.protocol.http.HttpProtocol" target="com.alibaba.dubbo.rpc.protocol.AbstractProxyProtocol">
+      <point x="0.0" y="-16.5" />
+      <point x="738.6798941798942" y="239.0" />
+      <point x="563.0548941798942" y="239.0" />
+      <point x="75.375" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.rpc.protocol.AbstractProtocol" target="com.alibaba.dubbo.rpc.Protocol">
+      <point x="0.0" y="-16.5" />
+      <point x="684.1798941798942" y="73.0" />
+      <point x="549.2632275132275" y="73.0" />
+      <point x="8.833333333333371" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.rpc.protocol.hessian.HessianProtocol" target="com.alibaba.dubbo.rpc.protocol.AbstractProxyProtocol">
+      <point x="0.0" y="-16.5" />
+      <point x="570.6798941798942" y="249.0" />
+      <point x="512.8048941798942" y="249.0" />
+      <point x="25.125" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.registry.integration.RegistryProtocol" target="com.alibaba.dubbo.rpc.Protocol">
+      <point x="0.0" y="-16.5" />
+      <point x="1104.1798941798943" y="53.0" />
+      <point x="584.5965608465608" y="53.0" />
+      <point x="44.16666666666663" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.rpc.protocol.memcached.MemcachedProtocol" target="com.alibaba.dubbo.rpc.protocol.AbstractProtocol">
+      <point x="0.0" y="-16.5" />
+      <point x="874.1798941798942" y="166.0" />
+      <point x="707.3227513227514" y="166.0" />
+      <point x="23.142857142857224" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.rpc.support.MockProtocol" target="com.alibaba.dubbo.rpc.protocol.AbstractProtocol">
+      <point x="0.0" y="-16.5" />
+      <point x="1059.1798941798943" y="156.0" />
+      <point x="730.4656084656085" y="156.0" />
+      <point x="46.285714285714334" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.rpc.protocol.redis.RedisProtocol" target="com.alibaba.dubbo.rpc.protocol.AbstractProtocol">
+      <point x="0.0" y="-16.5" />
+      <point x="295.6798941798942" y="156.0" />
+      <point x="637.8941798941798" y="156.0" />
+      <point x="-46.285714285714334" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.rpc.protocol.ProtocolListenerWrapper" target="com.alibaba.dubbo.rpc.Protocol">
+      <point x="0.0" y="-16.5" />
+      <point x="894.6798941798942" y="63.0" />
+      <point x="566.9298941798942" y="63.0" />
+      <point x="26.5" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.rpc.protocol.dubbo.DubboProtocol" target="com.alibaba.dubbo.rpc.protocol.AbstractProtocol">
+      <point x="0.0" y="-16.5" />
+      <point x="0.0" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.rpc.protocol.rmi.RmiProtocol" target="com.alibaba.dubbo.rpc.protocol.AbstractProxyProtocol">
+      <point x="0.0" y="-16.5" />
+      <point x="404.6798941798942" y="249.0" />
+      <point x="462.5548941798942" y="249.0" />
+      <point x="-25.125" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.rpc.protocol.injvm.InjvmProtocol" target="com.alibaba.dubbo.rpc.Protocol">
+      <point x="-36.0" y="-16.5" />
+      <point x="36.0" y="53.0" />
+      <point x="496.26322751322743" y="53.0" />
+      <point x="-44.166666666666686" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.rpc.protocol.AbstractProxyProtocol" target="com.alibaba.dubbo.rpc.protocol.AbstractProtocol">
+      <point x="0.0" y="-16.5" />
+      <point x="487.6798941798942" y="166.0" />
+      <point x="661.0370370370371" y="166.0" />
+      <point x="-23.14285714285711" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.rpc.protocol.webservice.WebServiceProtocol" target="com.alibaba.dubbo.rpc.protocol.AbstractProxyProtocol">
+      <point x="0.0" y="-16.5" />
+      <point x="226.67989417989418" y="239.0" />
+      <point x="412.3048941798942" y="239.0" />
+      <point x="-75.375" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.rpc.protocol.thrift.ThriftProtocol" target="com.alibaba.dubbo.rpc.protocol.AbstractProtocol">
+      <point x="0.0" y="-16.5" />
+      <point x="1221.6798941798943" y="146.0" />
+      <point x="753.6084656084656" y="146.0" />
+      <point x="69.42857142857144" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.config.support.MockProtocol" target="com.alibaba.dubbo.rpc.Protocol">
+      <point x="0.0" y="-16.5" />
+      <point x="454.4298941798942" y="73.0" />
+      <point x="531.5965608465608" y="73.0" />
+      <point x="-8.833333333333371" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.rpc.protocol.injvm.InjvmProtocol" target="com.alibaba.dubbo.rpc.protocol.AbstractProtocol">
+      <point x="36.0" y="-16.5" />
+      <point x="108.0" y="146.0" />
+      <point x="614.7513227513227" y="146.0" />
+      <point x="-69.42857142857144" y="16.5" />
+    </edge>
+    <edge source="com.alibaba.dubbo.rpc.protocol.ProtocolFilterWrapper" target="com.alibaba.dubbo.rpc.Protocol">
+      <point x="0.0" y="-16.5" />
+      <point x="263.9298941798942" y="63.0" />
+      <point x="513.9298941798942" y="63.0" />
+      <point x="-26.5" y="16.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="647.0" y="151.0" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

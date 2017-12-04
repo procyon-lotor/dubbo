@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.rpc;
 
 import java.util.Map;
@@ -71,7 +72,6 @@ public interface Result {
      */
     @Deprecated
     Object getResult();
-
 
     /**
      * get attachments.

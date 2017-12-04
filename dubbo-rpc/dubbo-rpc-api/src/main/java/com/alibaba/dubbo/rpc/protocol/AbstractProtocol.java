@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.rpc.protocol;
 
 import com.alibaba.dubbo.common.Constants;
@@ -46,10 +47,27 @@ public abstract class AbstractProtocol implements Protocol {
     //TODO SOFEREFENCE
     protected final Set<Invoker<?>> invokers = new ConcurrentHashSet<Invoker<?>>();
 
+    /**
+     * 构造服务标识
+     * /path:80?version={version}&group={group} -> group/path:version:port
+     *
+     * @param url
+     * @return
+     */
     protected static String serviceKey(URL url) {
         return ProtocolUtils.serviceKey(url);
     }
 
+    /**
+     * 构造服务标识
+     * "serviceGroup/serviceName:serviceVersion:port"
+     *
+     * @param port
+     * @param serviceName
+     * @param serviceVersion
+     * @param serviceGroup
+     * @return
+     */
     protected static String serviceKey(int port, String serviceName, String serviceVersion, String serviceGroup) {
         return ProtocolUtils.serviceKey(port, serviceName, serviceVersion, serviceGroup);
     }
