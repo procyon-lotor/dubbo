@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.common.extension.factory;
 
 import com.alibaba.dubbo.common.extension.ExtensionFactory;

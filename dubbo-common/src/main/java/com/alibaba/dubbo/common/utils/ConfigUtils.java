@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.common.utils;
 
 import com.alibaba.dubbo.common.Constants;
@@ -73,8 +74,8 @@ public class ConfigUtils {
      * </ul>
      *
      * @param type 扩展点类型
-     * @param cfg  扩展点名列表
-     * @param def  缺省的扩展点的列表
+     * @param cfg 扩展点名列表
+     * @param def 缺省的扩展点的列表
      * @return 完成缺省的扩展点列表插入后的列表
      */
     public static List<String> mergeValues(Class<?> type, String cfg, List<String> def) {
@@ -211,9 +212,9 @@ public class ConfigUtils {
     /**
      * Load properties file to {@link Properties} from class path.
      *
-     * @param fileName       properties file name. for example: <code>dubbo.properties</code>, <code>METE-INF/conf/foo.properties</code>
+     * @param fileName properties file name. for example: <code>dubbo.properties</code>, <code>METE-INF/conf/foo.properties</code>
      * @param allowMultiFile if <code>false</code>, throw {@link IllegalStateException} when found multi file on the class path.
-     * @param optional       is optional. if <code>false</code>, log warn when properties config file not found!s
+     * @param optional is optional. if <code>false</code>, log warn when properties config file not found!s
      * @return loaded {@link Properties} content. <ul>
      * <li>return empty Properties if no file found.
      * <li>merge multi properties file if found multi file

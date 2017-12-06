@@ -44,7 +44,7 @@ public abstract class AbstractProtocol implements Protocol {
 
     protected final Map<String, Exporter<?>> exporterMap = new ConcurrentHashMap<String, Exporter<?>>();
 
-    //TODO SOFEREFENCE
+    // TODO SOFEREFENCE
     protected final Set<Invoker<?>> invokers = new ConcurrentHashSet<Invoker<?>>();
 
     /**
@@ -74,7 +74,7 @@ public abstract class AbstractProtocol implements Protocol {
 
     @SuppressWarnings("deprecation")
     protected static int getServerShutdownTimeout() {
-        int timeout = Constants.DEFAULT_SERVER_SHUTDOWN_TIMEOUT;
+        int timeout = Constants.DEFAULT_SERVER_SHUTDOWN_TIMEOUT; // 10秒
         String value = ConfigUtils.getProperty(Constants.SHUTDOWN_WAIT_KEY);
         if (value != null && value.length() > 0) {
             try {
@@ -90,7 +90,6 @@ public abstract class AbstractProtocol implements Protocol {
                 }
             }
         }
-
         return timeout;
     }
 

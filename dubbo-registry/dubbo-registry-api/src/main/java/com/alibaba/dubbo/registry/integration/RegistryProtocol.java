@@ -50,14 +50,21 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RegistryProtocol implements Protocol {
 
     private final static Logger logger = LoggerFactory.getLogger(RegistryProtocol.class);
+
     private static RegistryProtocol INSTANCE;
+
     private final Map<URL, NotifyListener> overrideListeners = new ConcurrentHashMap<URL, NotifyListener>();
+
     //用于解决rmi重复暴露端口冲突的问题，已经暴露过的服务不再重新暴露
     //providerurl <--> exporter
     private final Map<String, ExporterChangeableWrapper<?>> bounds = new ConcurrentHashMap<String, ExporterChangeableWrapper<?>>();
+
     private Cluster cluster;
+
     private Protocol protocol;
+
     private RegistryFactory registryFactory;
+
     private ProxyFactory proxyFactory;
 
     public RegistryProtocol() {

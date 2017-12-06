@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.config.support;
 
 import com.alibaba.dubbo.common.URL;
@@ -28,24 +29,14 @@ import com.alibaba.dubbo.rpc.RpcException;
  */
 public class MockProtocol implements Protocol {
 
-    /* (non-Javadoc)
-     * @see com.alibaba.dubbo.rpc.Protocol#getDefaultPort()
-     */
     public int getDefaultPort() {
-
         return 0;
     }
 
-    /* (non-Javadoc)
-     * @see com.alibaba.dubbo.rpc.Protocol#export(com.alibaba.dubbo.rpc.Invoker)
-     */
     public <T> Exporter<T> export(Invoker<T> invoker) throws RpcException {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.alibaba.dubbo.rpc.Protocol#refer(java.lang.Class, com.alibaba.dubbo.common.URL)
-     */
     public <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException {
 
         final URL u = url;
@@ -73,9 +64,6 @@ public class MockProtocol implements Protocol {
         };
     }
 
-    /* (non-Javadoc)
-     * @see com.alibaba.dubbo.rpc.Protocol#destroy()
-     */
     public void destroy() {
 
     }

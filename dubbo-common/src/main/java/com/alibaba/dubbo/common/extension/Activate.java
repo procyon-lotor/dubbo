@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.common.extension;
 
 import java.lang.annotation.Documented;
@@ -22,18 +23,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Activate
- * <p/>
- * 对于可以被框架中自动激活加载扩展，此Annotation用于配置扩展被自动激活加载条件。
- * 比如，过滤扩展，有多个实现，使用Activate Annotation的扩展可以根据条件被自动加载。
- * <ol>
- * <li>{@link Activate#group()}生效的Group。具体的有哪些Group值由框架SPI给出。
- * <li>{@link Activate#value()}在{@link com.alibaba.dubbo.common.URL}中Key集合中有，则生效。
- * </ol>
- * <p>
- * <p/>
- * 底层框架SPI提供者通过{@link com.alibaba.dubbo.common.extension.ExtensionLoader}的{@link ExtensionLoader#getActivateExtension}方法
- * 获得条件的扩展。
+ * 对于可以被框架中自动激活加载扩展，此 Annotation 用于配置扩展被自动激活加载条件。
+ * 比如，过滤扩展，有多个实现，使用 Activate Annotation 的扩展可以根据条件被自动加载。
+ *
+ * - {@link Activate#group()} 生效的Group。具体的有哪些Group值由框架SPI给出。
+ * - {@link Activate#value()} 在 {@link com.alibaba.dubbo.common.URL} 中 Key 集合中有，则生效。
+ *
+ * 底层框架SPI提供者通过 {@link com.alibaba.dubbo.common.extension.ExtensionLoader}
+ * 的 {@link ExtensionLoader#getActivateExtension} 方法获得条件的扩展。
  *
  * @author william.liangf
  * @author ding.lid
