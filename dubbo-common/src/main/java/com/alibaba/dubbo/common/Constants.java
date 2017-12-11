@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.common;
 
 import java.util.concurrent.ExecutorService;
@@ -341,20 +342,17 @@ public class Constants {
 
     public static final String COMMA_SEPARATOR = ",";
 
-    public static final Pattern COMMA_SPLIT_PATTERN = Pattern
-            .compile("\\s*[,]+\\s*");
+    public static final Pattern COMMA_SPLIT_PATTERN = Pattern.compile("\\s*[,]+\\s*");
 
     public final static String PATH_SEPARATOR = "/";
 
     public static final String REGISTRY_SEPARATOR = "|";
 
-    public static final Pattern REGISTRY_SPLIT_PATTERN = Pattern
-            .compile("\\s*[|;]+\\s*");
+    public static final Pattern REGISTRY_SPLIT_PATTERN = Pattern.compile("\\s*[|;]+\\s*");
 
     public static final String SEMICOLON_SEPARATOR = ";";
 
-    public static final Pattern SEMICOLON_SPLIT_PATTERN = Pattern
-            .compile("\\s*[;]+\\s*");
+    public static final Pattern SEMICOLON_SPLIT_PATTERN = Pattern.compile("\\s*[;]+\\s*");
 
     public static final String CONNECT_QUEUE_CAPACITY = "connect.queue.capacity";
 

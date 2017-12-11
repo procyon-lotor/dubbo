@@ -70,19 +70,20 @@ public class ExtensionLoader<T> {
 
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
 
-    // 记录指定类 class 引用及其 ExtensionLoader 的映射关系
+    /** 缓存指定类型及其 ExtensionLoader 的映射关系（每一个类型都拥有属于自己的 ExtensionLoader） */
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?>, ExtensionLoader<?>>();
 
+    /** 缓存指定类型及其实例 */
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<Class<?>, Object>();
-
-    // ==============================
 
     private final Class<?> type;
 
     private final ExtensionFactory objectFactory;
 
+    /** 记录反向映射关系 */
     private final ConcurrentMap<Class<?>, String> cachedNames = new ConcurrentHashMap<Class<?>, String>();
 
+    /** 记录正向映射关系 */
     private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<Map<String, Class<?>>>();
 
     private final Map<String, Activate> cachedActivates = new ConcurrentHashMap<String, Activate>();
@@ -98,7 +99,8 @@ public class ExtensionLoader<T> {
 
     private ExtensionLoader(Class<?> type) {
         this.type = type;
-        objectFactory = (type == ExtensionFactory.class ? null : ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());
+        this.objectFactory = (type == ExtensionFactory.class ? null :
+                ExtensionLoader.getExtensionLoader(ExtensionFactory.class).getAdaptiveExtension());
     }
 
     private static <T> boolean withExtensionAnnotation(Class<T> type) {
@@ -106,7 +108,7 @@ public class ExtensionLoader<T> {
     }
 
     /**
-     * 获取类型对应的 ExtensionLoader
+     * 获取指定类型对应的 ExtensionLoader，缓存在本地，不存在则创建一个
      *
      * @param type
      * @param <T>
@@ -141,18 +143,28 @@ public class ExtensionLoader<T> {
         return ExtensionLoader.class.getClassLoader();
     }
 
+    /**
+     * 获取扩展类型对应的 name
+     *
+     * @param extensionInstance
+     * @return
+     */
     public String getExtensionName(T extensionInstance) {
-        return getExtensionName(extensionInstance.getClass());
+        return this.getExtensionName(extensionInstance.getClass());
     }
 
+    /**
+     * 获取扩展类型对应的 name
+     *
+     * @param extensionClass
+     * @return
+     */
     public String getExtensionName(Class<?> extensionClass) {
         return cachedNames.get(extensionClass);
     }
 
     /**
-     * This is equivalent to <pre>
-     *     getActivateExtension(url, key, null);
-     * </pre>
+     * This is equivalent to getActivateExtension(url, key, null);
      *
      * @param url url
      * @param key url parameter key which used to get extension point names
@@ -160,7 +172,7 @@ public class ExtensionLoader<T> {
      * @see #getActivateExtension(com.alibaba.dubbo.common.URL, String, String)
      */
     public List<T> getActivateExtension(URL url, String key) {
-        return getActivateExtension(url, key, null);
+        return this.getActivateExtension(url, key, null);
     }
 
     /**
@@ -189,7 +201,8 @@ public class ExtensionLoader<T> {
      */
     public List<T> getActivateExtension(URL url, String key, String group) {
         String value = url.getParameter(key);
-        return getActivateExtension(url, value == null || value.length() == 0 ? null : Constants.COMMA_SPLIT_PATTERN.split(value), group);
+        return this.getActivateExtension(url,
+                value == null || value.length() == 0 ? null : Constants.COMMA_SPLIT_PATTERN.split(value), group);
     }
 
     /**
@@ -204,7 +217,8 @@ public class ExtensionLoader<T> {
     public List<T> getActivateExtension(URL url, String[] values, String group) {
         List<T> exts = new ArrayList<T>();
         List<String> names = values == null ? new ArrayList<String>(0) : Arrays.asList(values);
-        if (!names.contains(Constants.REMOVE_VALUE_PREFIX + Constants.DEFAULT_KEY)) { // "-default"
+        // 不包含 “-default”
+        if (!names.contains(Constants.REMOVE_VALUE_PREFIX + Constants.DEFAULT_KEY)) {
             this.getExtensionClasses();
             for (Map.Entry<String, Activate> entry : cachedActivates.entrySet()) {
                 String name = entry.getKey();
@@ -585,7 +599,11 @@ public class ExtensionLoader<T> {
         return classes;
     }
 
-    // 此方法已经getExtensionClasses方法同步过。
+    /**
+     * 此方法已经getExtensionClasses方法同步过。
+     *
+     * @return
+     */
     private Map<String, Class<?>> loadExtensionClasses() {
         final SPI defaultAnnotation = type.getAnnotation(SPI.class);
         if (defaultAnnotation != null) {
@@ -601,9 +619,9 @@ public class ExtensionLoader<T> {
         }
 
         Map<String, Class<?>> extensionClasses = new HashMap<String, Class<?>>();
-        loadFile(extensionClasses, DUBBO_INTERNAL_DIRECTORY);
-        loadFile(extensionClasses, DUBBO_DIRECTORY);
-        loadFile(extensionClasses, SERVICES_DIRECTORY);
+        this.loadFile(extensionClasses, DUBBO_INTERNAL_DIRECTORY);
+        this.loadFile(extensionClasses, DUBBO_DIRECTORY);
+        this.loadFile(extensionClasses, SERVICES_DIRECTORY);
         return extensionClasses;
     }
 
