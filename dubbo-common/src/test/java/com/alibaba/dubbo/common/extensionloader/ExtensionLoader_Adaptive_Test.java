@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.common.extensionloader;
 
 import com.alibaba.dubbo.common.URL;
@@ -28,20 +29,18 @@ import com.alibaba.dubbo.common.extensionloader.ext5.NoAdaptiveMethodExt;
 import com.alibaba.dubbo.common.extensionloader.ext6_inject.Ext6;
 import com.alibaba.dubbo.common.extensionloader.ext6_inject.impl.Ext6Impl2;
 import com.alibaba.dubbo.common.utils.LogUtil;
-
 import junit.framework.Assert;
-import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import org.junit.Test;
 import static org.junit.matchers.JUnitMatchers.containsString;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author ding.lid

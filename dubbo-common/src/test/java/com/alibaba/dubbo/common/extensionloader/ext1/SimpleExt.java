@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.common.extensionloader.ext1;
 
 import com.alibaba.dubbo.common.URL;
@@ -27,6 +28,7 @@ import com.alibaba.dubbo.common.extension.SPI;
  */
 @SPI("impl1")
 public interface SimpleExt {
+
     // 没有使用key的@Adaptive ！
     @Adaptive
     String echo(URL url, String s);
@@ -36,4 +38,5 @@ public interface SimpleExt {
 
     // 无@Adaptive ！
     String bang(URL url, int i);
+
 }
