@@ -544,17 +544,20 @@ public class ExtensionLoader<T> {
      */
     @SuppressWarnings("unchecked")
     private T createExtension(String name) {
+        // 获取扩展名称对应的实现类 Class 对象
         Class<?> clazz = this.getExtensionClasses().get(name);
         if (clazz == null) {
-            // 异常
             throw this.findException(name);
         }
         try {
+            // 尝试从缓存中获取对应的实例
             T instance = (T) EXTENSION_INSTANCES.get(clazz);
             if (instance == null) {
+                // 反射实例化
                 EXTENSION_INSTANCES.putIfAbsent(clazz, clazz.newInstance());
                 instance = (T) EXTENSION_INSTANCES.get(clazz);
             }
+            // 执行 setter 注入
             this.injectExtension(instance);
             Set<Class<?>> wrapperClasses = cachedWrapperClasses;
             if (wrapperClasses != null && wrapperClasses.size() > 0) {

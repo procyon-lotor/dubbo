@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.alibaba.dubbo.config.spring.extension;
 
 import com.alibaba.dubbo.common.extension.ExtensionFactory;
 import com.alibaba.dubbo.common.utils.ConcurrentHashSet;
-
 import org.springframework.context.ApplicationContext;
 
 import java.util.Set;
