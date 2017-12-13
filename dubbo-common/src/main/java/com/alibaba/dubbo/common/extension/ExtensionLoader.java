@@ -70,7 +70,7 @@ public class ExtensionLoader<T> {
 
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
 
-    /** 缓存指定类型及其 ExtensionLoader 的映射关系（每一个类型都拥有属于自己的 ExtensionLoader） */
+    /** 缓存扩展类型及其关联的 ExtensionLoader 对象（每一个扩展类型都拥有属于自己的 ExtensionLoader） */
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<Class<?>, ExtensionLoader<?>>();
 
     /** 缓存指定类型及其实例 */
@@ -89,7 +89,7 @@ public class ExtensionLoader<T> {
     /** 记录被 {@link Activate} 注解的扩展实现类的注解配置 */
     private final Map<String, Activate> cachedActivates = new ConcurrentHashMap<String, Activate>();
 
-    /** 记录扩展名称与对应扩展类型实例的 {@link Holder} 对象 */
+    /** 记录扩展名称与对应持有扩展类型实例的 {@link Holder} 对象 */
     private final ConcurrentMap<String, Holder<Object>> cachedInstances = new ConcurrentHashMap<String, Holder<Object>>();
 
     /** 记录扩展类 Adaptive 实例 */
@@ -353,7 +353,9 @@ public class ExtensionLoader<T> {
             // 获取默认的实现类
             return this.getDefaultExtension();
         }
-        Holder<Object> holder = cachedInstances.get(name);
+
+        // 获取指定名称的扩展类型实例
+        Holder<Object> holder = cachedInstances.get(name); // 先尝试从缓存中获取
         if (holder == null) {
             cachedInstances.putIfAbsent(name, new Holder<Object>());
             holder = cachedInstances.get(name);
@@ -363,6 +365,7 @@ public class ExtensionLoader<T> {
             synchronized (holder) {
                 instance = holder.get();
                 if (instance == null) {
+                    // 创建扩展类型实现
                     instance = this.createExtension(name);
                     holder.set(instance);
                 }
