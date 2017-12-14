@@ -1,0 +1,2 @@
+local=org.zhenchao.spi.LocalIpResolver
+remote=org.zhenchao.spi.RemoteIpResolver
