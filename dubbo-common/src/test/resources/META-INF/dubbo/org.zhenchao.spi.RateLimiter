@@ -1,3 +1,4 @@
 api=org.zhenchao.spi.ApiRateLimiter
 ip=org.zhenchao.spi.IpRateLimiter
 user=org.zhenchao.spi.UserRateLimiter
+device=org.zhenchao.spi.DeviceRateLimiter

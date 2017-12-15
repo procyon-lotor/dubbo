@@ -858,6 +858,7 @@ public class ExtensionLoader<T> {
     private Class<?> createAdaptiveExtensionClass() {
         // 生产扩展类型的 Adaptive 类 java 代码
         String code = this.createAdaptiveExtensionClassCode();
+        System.out.println("code : " + code);
         ClassLoader classLoader = findClassLoader();
         // 编译机器生成的 Adaptive 类 java 代码
         com.alibaba.dubbo.common.compiler.Compiler compiler =
